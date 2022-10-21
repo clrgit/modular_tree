@@ -4,7 +4,7 @@ require_relative "lib/modular_tree/version"
 
 Gem::Specification.new do |spec|
   spec.name = "modular_tree"
-  spec.version = ModularTree::VERSION
+  spec.version = Tree::VERSION
   spec.authors = ["Claus Rasmussen"]
   spec.email = ["claus.l.rasmussen@gmail.com"]
 
@@ -41,4 +41,8 @@ Gem::Specification.new do |spec|
 
   # Also un-comment in spec/spec_helper to use simplecov
   # spec.add_development_dependency "simplecov"
+
+  spec.add_dependency 'constrain'
+  spec.add_dependency 'forward_to'
+  spec.add_dependency 'abstract_method_error'
 end
