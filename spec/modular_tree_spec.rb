@@ -21,6 +21,7 @@ describe "Tree::PoolTree" do
     end
   }
 
+
   def build
     root = klass.new(nil, "root")
     a = klass.new(root, "a")
@@ -37,7 +38,7 @@ describe "Tree::PoolTree" do
   end
 
   describe "::keys" do
-    it "returns the keys in the pool" do
+    it "returns the keys (uids) in the pool" do
       t = build
       expect(klass.keys).to eq %w(root root.a root.a.b root.a.c root.d root.d.e)
     end
@@ -52,4 +53,27 @@ describe "Tree::PoolTree" do
       expect(klass.nodes).to eq [n1, n2]
     end
   end
+
+  describe "::[]" do
+    it "lookups a node by key (uid)" do
+      t = build
+      expect(klass["root"].key).to eq "root"
+      expect(klass["root.a.b"].key).to eq "b"
+    end
+    it "returns nil if not found" do
+      expect(klass["a.b"]).to eq nil
+    end
+  end
 end
+
+
+
+
+
+
+
+
+
+
+
+

@@ -161,8 +161,7 @@ module Tree
     def size = abstract_method
   end
 
-  # A regular tree. Users of this library should derived their base node class
-  # from Tree
+  # A regular tree. Users of this library should derived their base class from Tree
   #
   class Tree < AbstractTree # Aka. SetTree aka. ArrayTree
     include ParentImplementation
