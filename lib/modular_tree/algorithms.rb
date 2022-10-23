@@ -1,3 +1,4 @@
+require_relative "dependencies"
 
 module Tree
   # A down tree can only be traversed bottom-up
@@ -6,14 +7,8 @@ module Tree
   #
   # UpTreeAlgorithms expects #parent to be defined
   module UpTreeAlgorithms
-#   def self.included(other)
-#     super
-#     p other.is_a?(ParentImplementation)
-#   end
-
-
-    def parent = abstract_method
-    def root? = parent.nil?
+    include Tracker
+    require_module ParentProperty
 
     # Bottom-up
     def ancestors
@@ -42,8 +37,8 @@ module Tree
   #
   # DownTreeAlgorithms expects #children to be defined
   module DownTreeFilteredAlgorithms
-    # List of child nodes
-    def children = abstract_method
+    include Tracker
+    require_module ChildrenProperty
 
     # True if the node doesn't contain any children
     def empty? = children.empty?
@@ -231,19 +226,45 @@ module Tree
   end
 
   module DownTreeAlgorithms
-    include DownTreeFilteredAlgorithms
+    include Tracker
+    require_module DownTreeFilteredAlgorithms
+
+    def self.included(other)
+      other.include DownTreeFilteredAlgorithms
+      super
+    end
+
+#   include DownTreeFilteredAlgorithms
 
     # Very lazy implementation
-    def descendants = preorder(Filter::ALL, this: false)
-    def filter(*args) = abstract_method
-    alias_method :nodes, :each
-    def edges(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def pairs(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def preorder(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def postorder(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def visit(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def accumulate(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def aggregate(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
-    def find(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def descendants = preorder(Filter::ALL, this: false)
+#   def filter(*args) = abstract_method
+#   alias_method :nodes, :each
+#   def edges(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def pairs(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def preorder(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def postorder(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def visit(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def accumulate(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def aggregate(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+#   def find(*args, **opts, &block) = super(Filter::ALL, *args, **opts, &block)
+  end
+
+  module PathAlgorithms
+    include Tracker
+    require_module KeyProperty, UpTreeAlgorithms
+
+    def separator = @separator ||= parent&.separator || ::Tree.separator
+    def separator=(s) @separator = s end
+
+    def path = @path ||= ancestry[1..-1]&.map(&:key)&.join(separator) || ""
+    def uid() @uid ||= [parent&.uid, key].compact.join(separator) end
+  end
+
+  module DotAlgorithms
+    include Tracker
+    require_module KeysProperty
+
+    def dot(path) = Separator.split(path).keys.each.inject(self) { |a,e| a[e] }
   end
 end

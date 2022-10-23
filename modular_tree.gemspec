@@ -45,4 +45,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'constrain'
   spec.add_dependency 'forward_to'
   spec.add_dependency 'abstract_method_error'
+  spec.add_development_dependency 'indented_io'
 end

@@ -6,15 +6,152 @@ describe Tree do
   it 'does something useful'
 end
 
+
 describe "Tree::PoolTree" do
-  let(:klass) {
-    Class.new do
-      include Tree::NodePool
-      include Tree::NodePath
-      include Tree::ParentImplementation
-      def self.pool = @pool
+#     include Tree::ParentImplementation
+#     include Tree::ArrayImplementation
+#     include Tree::ChildrenProperty
+#     include Tree::PoolProperty
+#     include Tree::KeyProperty
+#     include Tree::ParentProperty
+#     include Tree::UpTreeAlgorithms
+#     include Tree::PathProperty
+
+
+# let(:klass) {
+#   Class.new do
+#     include Tree::ParentProperty
+#     include Tree::ChildrenProperty
+#     include Tree::KeyProperty
+#
+#     include Tree::UpTreeAlgorithms # Ups: Overskriver ParentImplementation#parent
+#     include Tree::DownTreeAlgorithms
+#     include Tree::PathAlgorithms
+#
+#     include Tree::ParentImplementation
+#     include Tree::ArrayImplementation
+#
+#     include Tree::Pool
+#
+#     attr_reader :key
+#
+#     def initialize(parent, key)
+#       @key = key
+#       parent&.attach(self)
+#       self.send(:parent=, parent)
+#       super()
+#     end
+#   end
+# }
+
+
+  let(:bare_tree) {
+    Class.new(Tree::Tree)
+  }
+
+# describe "" do
+#   it "asdfasdf" do
+#     puts "==============================="
+#     root = bare_tree.new(nil)
+#     puts "==============================="
+#     a = klass.new(root)
+#     puts "==============================="
+#     expect(a.parent).to eq root
+#     expect(root.children).to eq [a]
+#   end
+# end
+
+  let(:base) {
+    Class.new(Tree::AbstractTree) do
       attr_reader :key
-      def initialize(parent, key) 
+      def initialize(parent, key)
+        p :BING
+        @key = key
+        super(parent)
+      end
+      def to_s() @key end
+    end
+  }
+
+#     Tree::ParentImplementation,
+#     Tree::ArrayImplementation #,
+#     Tree::ParentChildImplementation #,
+#     Tree::UpTreeAlgorithms,
+#     Tree::DownTreeAlgorithms
+
+  def mk_klass(*modules)
+    Class.new(Tree::AbstractTree) do
+      include Tree::Tracker
+      use_module *modules
+      attr_reader :key
+      def initialize(parent, key)
+        @key = key
+        super(parent)
+      end
+      def to_s() = @key
+    end
+  end
+
+  describe "ParentImplementation" do
+    let(:tree) { mk_klass(Tree::ParentImplementation) }
+
+    it "defines #parent" do
+      r = tree.new(nil, "r")
+      a = tree.new(r, "a")
+      expect(r.parent).to eq nil
+      expect(a.parent).to eq r
+    end
+  end
+
+  describe "ArrayImplementation" do
+    let(:tree) { mk_klass(Tree::ArrayImplementation) }
+
+    it "defines #children" do
+      r = tree.new(nil, "r")
+      expect(r.children).to eq []
+    end
+
+    it "defines #attach" do
+      r = tree.new(nil, "r")
+      a = tree.new(nil, "a")
+      r.attach(a)
+      expect(r.children).to eq [a]
+    end
+  end
+
+  describe "ParentChildImplementation" do
+    let(:tree) { mk_klass(Tree::ParentChildImplementation, Tree::ArrayImplementation) }
+
+    it "links up with parent" do
+      r = tree.new(nil, "r")
+      a = tree.new(r, "a")
+      expect(r.children).to eq [a]
+      expect(a.parent).to eq r
+    end
+
+    it "redefine ChildrenImplementation#attach" do
+      r = tree.new(nil, "r")
+      a = tree.new(nil, "a")
+      r.attach(a)
+      expect(r.children).to eq [a]
+      expect(a.parent).to eq r
+    end
+  end
+end
+
+__END__
+
+
+
+  let(:klass) {
+    Class.new(Tree::Tree) do
+      include Tree::KeyProperty
+      include Tree::PathAlgorithms
+      include Tree::Pool
+
+      attr_reader :key
+
+      def initialize(parent, key)
         @key = key
         super(parent)
       end
@@ -32,9 +169,9 @@ describe "Tree::PoolTree" do
   end
 
   describe "::include" do
-    it "initializes the pool" do
-      expect(klass.pool).to eq({})
-    end
+    it "initializes the pool"
+#     expect(klass.pool).to eq({})
+#   end
   end
 
   describe "::keys" do

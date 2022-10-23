@@ -4,6 +4,21 @@ Welcome to your new gem! In this directory, you'll find the files you need to be
 
 TODO: Delete this and the text above, and describe your gem
 
+## Usage
+
+TODO: Write usage instructions here
+
+
+## Description
+
+ModularTree classes are defined by using a set of modules that can be divided into the following categories:
+
+  * Property modules
+  * Implementation modules
+  * Algorithms modules
+
+
+
 ## Installation
 
 Install the gem and add to the application's Gemfile by executing:
@@ -13,10 +28,6 @@ Install the gem and add to the application's Gemfile by executing:
 If bundler is not being used to manage dependencies, install the gem by executing:
 
     $ gem install modular_tree
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
