@@ -22,15 +22,16 @@ module Tree
 
   # Not tested atm. Demonstrates a linked list implementation
   module ListImplementation
+    include Tracker
     include ChildrenImplementation
 
     attr_reader :first_child
     attr_reader :next_sibling
 
     def children
-      n = self.first_child
+      n = self.first_child or return []
       a = [n]
-      a << n while n = n.first_sibling
+      a << n while n = n.next_sibling
       a
     end
 

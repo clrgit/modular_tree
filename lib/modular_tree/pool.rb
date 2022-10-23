@@ -4,12 +4,12 @@ module Tree
     require_module PathAlgorithms
 
     def self.included(other)
-      other.include(ClassMethods)
+      other.extend(ClassMethods)
       other.instance_variable_set(:@pool, {})
       super
     end
 
-    def initialize
+    def initialize(_parent)
       super
       self.class[self.uid] = self
     end

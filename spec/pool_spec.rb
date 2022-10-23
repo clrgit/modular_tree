@@ -1,15 +1,5 @@
-describe "Tree" do
-  it 'has a version number' do
-    expect(Tree::VERSION).not_to be_nil
-  end
 
-  it 'does something useful'
-end
-
-__END__
-
-
-
+describe "Pool" do
   let(:klass) {
     Class.new(Tree::Tree) do
       include Tree::KeyProperty
@@ -25,7 +15,6 @@ __END__
     end
   }
 
-
   def build
     root = klass.new(nil, "root")
     a = klass.new(root, "a")
@@ -33,12 +22,6 @@ __END__
     c = klass.new(a, "c")
     d = klass.new(root, "d")
     e = klass.new(d, "e")
-  end
-
-  describe "::include" do
-    it "initializes the pool"
-#     expect(klass.pool).to eq({})
-#   end
   end
 
   describe "::keys" do
@@ -69,11 +52,6 @@ __END__
     end
   end
 end
-
-
-
-
-
 
 
 

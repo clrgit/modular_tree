@@ -55,10 +55,15 @@ module Tree
           provided_modules(m) + required_modules(m).map { |rm| all_provided_modules(rm) }.flatten
     end
 
+    # FIXME: Does order-of-inclusion matter anymore? 
     def self.use_module(m, *modules)
       constrain m, Module
-      constrain modules, Module, [Module]
       modules = Array(modules).flatten
+      constrain modules, Module, [Module]
+      modules.each { |m|
+        m.respond_to?(:recursively_provided_modules, true) or
+            raise ArgumentError, "Module '#{m}' does not include Tree::Tracker" 
+      }
 #     puts "use_module(#{m.inspect}, #{modules.inspect})"
 #     indent {
         all_required_modules = modules.map { |m| [m, recursively_required_modules(m)] }.flatten.uniq
@@ -81,7 +86,8 @@ module Tree
           r = m
           for um in use_modules
 #           p um
-            if um.recursively_provided_modules.include?(m)
+            if recursively_provided_modules(um).include?(m)
+#           if um.send(:recursively_provided_modules).include?(m)
               r = um
               break
             end
@@ -165,88 +171,24 @@ module Tree
     end
 
     module ClassMethods
-      def abstract_module() = Dependencies.abstract_module(self)
       def abstract?() = Dependencies.abstract?(self)
 
+      def abstract_module() = Dependencies.abstract_module(self)
       def require_module(*modules) = Dependencies.require_module(self, modules)
+      def provide_module(*modules) = Dependencies.provide_module(self, modules)
+      def use_module(*modules) = Dependencies.use_module(self, *modules)
+
+    protected
       def required_modules = Dependencies.required_modules(self)
       def recursively_required_modules = Dependencies.recursively_required_modules(self)
 
-      def provide_module(*modules) = Dependencies.provide_module(self, modules)
       def provided_modules = Dependencies.provided_modules(self)
       def recursively_provided_modules = Dependencies.recursively_provided_modules(self)
       def all_provided_modules = Dependencies.all_provided_modules(self)
       
 
-      def use_module(*modules) = Dependencies.use_module(self, *modules)
     end
-
-
-
-#     puts "use_module(#{modules.inspect}"
-#     indent {
-#       uses = Array(modules).flatten
-#       
-#
-#       provides = uses.map { |m| m.provided_modules }.flatten
-#       puts "provides: #{provides.inspect}"
-#
-#
-#
-#
-#
-#       # Filter out base modules that are provided by other modules
-#       uses.delete { |m| provides.include?(m) }
-#       
-#       # Check if two modules provide the same property
-#       unique_modules = {} # Map from provided module to providing module
-#       uses.each { |u| u.provided_modules.each { |m|
-#         other = unique_modules[m]
-#         !unique_modules.key?(m) or raise ArgumentError, "#{m} is already provided by #{other}"
-#       } }
-#
-#       # Sort modules in dependency order
-#
-#       # Filter out modules that are provided by other modules
-#
-#     }
-#   end
   end
 end
-
-
-
-
-
-
-
-
-
-
-#module M1
-# extend Tracker
-#end
-#
-#module M2
-# extend Tracker
-# require_module M1
-#end
-#
-#module M3
-# extend Tracker
-# require_module M2
-#end
-#
-#class M4 < Module
-# def initialize(arg)
-#   @arg = arg
-# end
-#end
-#
-#class T
-# include M1
-# include M2
-# include M3
-#end
 
 
