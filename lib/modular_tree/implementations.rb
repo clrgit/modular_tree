@@ -52,16 +52,11 @@ module Tree
     attr_reader :children
 
     def initialize(_parent)
-#     puts "ArrayImplementation#initialize"
       @children = []
-#     puts self.class.ancestors
       super
     end
 
-    def attach(child)
-#     puts "ArrayImplementation#attach(#{child})"
-      @children << child
-    end
+    def attach(child) = @children << child
   end
 
   module HashImplementation
@@ -92,3 +87,4 @@ module Tree
     end
   end
 end
+

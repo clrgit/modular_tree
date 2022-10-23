@@ -1,23 +1,42 @@
 # ModularTree
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/modular_tree`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+A modular tree implementation for Ruby
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+require "modular_tree"
+
+class Node < Tree::Tree
+  attr_reader :name
+  def initialize(parent, name)
+    @name = name
+    super(parent)
+  end
+  def to_s(name)
+end
+
+root = Node.new(nil, "root")
+a = Node.new(root, "a")
+b = Node.new(root, "b")
+
+puts root.children.join(', ') # a, b
+puts a.parent                 # root
 
 
 ## Description
 
-ModularTree classes are defined by using a set of modules that can be divided into the following categories:
+ModularTree classes are defined by using a set of modules that can be divided
+into the following categories:
 
   * Property modules
   * Implementation modules
   * Algorithms modules
 
-
+Property modules defines abstract properties that are defined by the
+implementation modules while algorithms are defined in terms of properties.
+This decouples algorithms and implementations and makes it possible to use the
+same algorithms on different tree implementations
 
 ## Installation
 

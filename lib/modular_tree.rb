@@ -41,16 +41,35 @@ module Tree
     include Tracker
 
     use_module \
-      Tree::ParentImplementation,
-      Tree::ArrayImplementation #,
-#     Tree::ParentChildImplementation #,
-#     Tree::UpTreeAlgorithms,
-#     Tree::DownTreeAlgorithms
+      ::Tree::ParentImplementation,
+      ::Tree::ArrayImplementation,
+      ::Tree::ParentChildImplementation,
+      ::Tree::UpTreeAlgorithms,
+      ::Tree::DownTreeAlgorithms
 
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
 
+  # Default tree
   Tree = ArrayTree
+
+  class FilteredArrayTree < ArrayTree
+    include Tracker
+
+#   puts superclass
+#   p superclass.ancestors
+#   exit
+
+    use_module \
+      ::Tree::ParentImplementation,
+      ::Tree::ArrayImplementation,
+      ::Tree::ParentChildImplementation,
+      ::Tree::UpTreeAlgorithms,
+      ::Tree::DownTreeFilteredAlgorithms
+
+    def self.filter(*args) = FilteredDownTreeAlgorithms.filter(*args)
+  end
+
 
 # p Tree.ancestors
 # exit

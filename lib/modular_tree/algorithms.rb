@@ -125,11 +125,12 @@ module Tree
       do_visit(filter, this, &block)
     end
 
-    # Traverse the tree top-down while accumulating information in an accumulator
-    # object. The block takes a [accumulator, node] tuple and is responsible
-    # for adding itself to the accumulator. The return value from the block is
-    # then used as the accumulator for the child nodes. Returns the original
-    # accumulator. See also #inject
+    # Traverse the tree top-down while accumulating information in an
+    # accumulator object. The block takes a [accumulator, node] tuple and is
+    # responsible for adding itself to the accumulator. The return value from
+    # the block is then used as the accumulator for the child nodes. Note that
+    # it returns the original accumulator and not the final result (FIXME:
+    # Why?). See also #inject
     def accumulate(*filter, accumulator, this: true, &block)
       filter = self.class.filter(*filter)
       block_given? or raise ArgumentError, "Block is required"
@@ -221,7 +222,7 @@ module Tree
     def do_aggregate(filter, this, &block)
       select, traverse = filter.match(self)
       values = traverse ? children.map { |child| child.do_aggregate(filter, true, &block) } : []
-      select ? yield(self, values) : values
+      yield(self, values)
     end
   end
 
@@ -233,6 +234,8 @@ module Tree
       other.include DownTreeFilteredAlgorithms
       super
     end
+
+    def self.filter(*args) = DownTreeFilteredAlgorithms.filter(*args)
 
 #   include DownTreeFilteredAlgorithms
 

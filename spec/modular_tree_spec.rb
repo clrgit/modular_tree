@@ -3,7 +3,48 @@ describe "Tree" do
     expect(Tree::VERSION).not_to be_nil
   end
 
-  it 'does something useful'
+  describe "Tree" do
+    let(:klass) {
+      Class.new(Tree::Tree) do
+        attr_reader :name
+        def initialize(parent, name)
+          @name = name
+          super(parent)
+        end
+        def to_s = @name
+        def inspect = "<Node:#@name>"
+      end
+    }
+
+    let!(:root) { klass.new(nil, "root") }
+    let!(:a) { klass.new(root, "a") }
+    let!(:b) { klass.new(a, "b") }
+    let!(:c) { klass.new(a, "c") }
+    let!(:d) { klass.new(root, "d") }
+    let!(:e) { klass.new(d, "e") }
+
+    it "has parent implementation" do
+      expect(root.parent).to eq nil
+      expect(a.parent).to eq root
+    end
+    it "has children array implementation" do
+      expect(root.children).to eq [a, d]
+      expect(a.children).to eq [b, c]
+      expect(b.children).to eq []
+    end
+    it "has up-methods" do
+      expect(root.ancestors).to eq []
+      expect(a.ancestors).to eq [root]
+      expect(c.ancestors).to eq [a, root]
+    end
+    it "has down-methods" do
+      s = root.aggregate { |node, values| 
+        values = values.empty? ? "" : "(#{values.join(',')})"
+        "#{node}#{values}" 
+      }
+      expect(s).to eq "root(a(b,c),d(e))"
+    end
+  end
 end
 
 __END__
