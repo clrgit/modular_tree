@@ -24,12 +24,11 @@ require "indented_io"
 module Tree
   DEFAULT_SEPARATOR = "."
 
+  # TODO: Move to algorithms
   @separator = nil
   def Tree.separator = @separator ||= DEFAULT_SEPARATOR
   def Tree.separator=(s) @separator = s end
-end
 
-module Tree
   class AbstractTree
     def empty? = abstract_method
     def size = abstract_method
@@ -41,11 +40,11 @@ module Tree
     include Tracker
 
     use_module \
-      ::Tree::ParentImplementation,
-      ::Tree::ArrayImplementation,
-      ::Tree::ParentChildImplementation,
-      ::Tree::UpTreeAlgorithms,
-      ::Tree::DownTreeAlgorithms
+        ::Tree::ParentImplementation,
+        ::Tree::ArrayImplementation,
+        ::Tree::ParentChildImplementation,
+        ::Tree::UpTreeAlgorithms,
+        ::Tree::DownTreeAlgorithms
 
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
@@ -56,19 +55,47 @@ module Tree
   class FilteredArrayTree < ArrayTree
     include Tracker
 
-#   puts superclass
-#   p superclass.ancestors
-#   exit
-
     use_module \
-      ::Tree::ParentImplementation,
-      ::Tree::ArrayImplementation,
-      ::Tree::ParentChildImplementation,
-      ::Tree::UpTreeAlgorithms,
-      ::Tree::DownTreeFilteredAlgorithms
+        ::Tree::DownTreeFilteredAlgorithms
 
     def self.filter(*args) = FilteredDownTreeAlgorithms.filter(*args)
   end
+
+# exit
+
+# class NestedArrayTree < AbstractTree
+#   include Tracker
+#
+#   provide_module ChildrenProperty
+#
+#   use_module \
+#     ::Tree::ExternalDownTreeAlgorithms
+#
+#
+#   def initialize(array)
+#     super(nil)
+#   end
+#
+#   def node(node) = node.first
+#   def children(node) = node.last
+# end
+#
+# data = 
+#   ["root", [
+#     ["a", [
+#       ["b", []],
+#       ["c", []]
+#     ]],
+#     ["d", [
+#       ["e", []],
+#     ]]
+#   ]]
+#
+# tree = NestedArrayTree.new(data)
+# tree.visit { ... }
+#
+# NestedArrayTree.visit(data) { ... }
+#       
 
 
 # p Tree.ancestors

@@ -3,9 +3,10 @@ require_relative "dependencies"
 module Tree
   # A down tree can only be traversed bottom-up
   #
+  # UpTreeAlgorithms expects #parent to be defined
+  #
   # TODO: Add FilteredUpTreeAlgorithms
   #
-  # UpTreeAlgorithms expects #parent to be defined
   module UpTreeAlgorithms
     include Tracker
     require_module ParentProperty
@@ -33,9 +34,15 @@ module Tree
   # A down tree can only be traversed top-down as it has no reference to its
   # parent. It is also a kind of a graph node
   #
-  # TODO: Split into DownTreeAlgorithms and DownTreeFilteredAlgorithms
-  #
   # DownTreeAlgorithms expects #children to be defined
+  #
+  # TODO: Turn into class methods to implement array/hash/other adaptors.
+  #       #children should then be called as 'children(node)' everywhere
+  #
+  #       A #node method should also be defined at the top-most level
+  #
+  # TODO: Better split between DownTreeAlgorithms and DownTreeFilteredAlgorithms
+  #
   module DownTreeFilteredAlgorithms
     include Tracker
     require_module ChildrenProperty

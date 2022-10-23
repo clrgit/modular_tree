@@ -64,10 +64,12 @@ module Tree
         m.respond_to?(:recursively_provided_modules, true) or
             raise ArgumentError, "Module '#{m}' does not include Tree::Tracker" 
       }
+
 #     puts "use_module(#{m.inspect}, #{modules.inspect})"
 #     indent {
         all_required_modules = modules.map { |m| [m, recursively_required_modules(m)] }.flatten.uniq
-        all_provided_modules = ([m] + modules).map { |m| all_provided_modules(m) }.flatten.uniq
+        all_provided_modules = 
+            (m.ancestors + [m] + modules).map { |m| all_provided_modules(m) }.flatten.uniq
         diff = all_required_modules - all_provided_modules
 
 #       puts "all_required_modules: #{all_required_modules.inspect}"
