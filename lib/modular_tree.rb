@@ -95,6 +95,9 @@ module Tree
 # tree.visit { ... }
 #
 # NestedArrayTree.visit(data) { ... }
+#
+# NestedArrayTree.adapt(data)
+# data.visit { ... }
 #       
 
 

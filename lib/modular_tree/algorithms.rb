@@ -3,8 +3,6 @@ require_relative "dependencies"
 module Tree
   # A down tree can only be traversed bottom-up
   #
-  # UpTreeAlgorithms expects #parent to be defined
-  #
   # TODO: Add FilteredUpTreeAlgorithms
   #
   module UpTreeAlgorithms
@@ -33,8 +31,6 @@ module Tree
 
   # A down tree can only be traversed top-down as it has no reference to its
   # parent. It is also a kind of a graph node
-  #
-  # DownTreeAlgorithms expects #children to be defined
   #
   # TODO: Turn into class methods to implement array/hash/other adaptors.
   #       #children should then be called as 'children(node)' everywhere
@@ -136,8 +132,8 @@ module Tree
     # accumulator object. The block takes a [accumulator, node] tuple and is
     # responsible for adding itself to the accumulator. The return value from
     # the block is then used as the accumulator for the child nodes. Note that
-    # it returns the original accumulator and not the final result (FIXME:
-    # Why?). See also #inject
+    # it returns the original accumulator and not the final result - this makes
+    # it different from #inject
     def accumulate(*filter, accumulator, this: true, &block)
       filter = self.class.filter(*filter)
       block_given? or raise ArgumentError, "Block is required"
@@ -145,7 +141,8 @@ module Tree
       accumulator
     end
 
-    # Traverse the tree bottom-up while aggregating information
+    # Traverse the tree bottom-up while aggregating information. The block is
+    # called with a [current-node, child-node-results] tuple
     def aggregate(*filter, this: true, &block)
       filter = self.class.filter(*filter)
       do_aggregate(filter, this, &block)
@@ -278,3 +275,4 @@ module Tree
     def dot(path) = Separator.split(path).keys.each.inject(self) { |a,e| a[e] }
   end
 end
+
