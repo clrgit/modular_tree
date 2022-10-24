@@ -48,7 +48,7 @@ module Tree
 
     # The number of nodes in the tree. Note that this can be an expensive
     # operation since every node that to be visited
-    def size = descendants.to_a.size
+    def size = 1 + descendants.to_a.size
 
     # Enumerator of descendant nodes matching filter. Same as #preorder with
     # :this set to false
@@ -59,6 +59,15 @@ module Tree
 
     # Implementation of Enumerable#map
     def map(&block) = preorder.map(&block)
+
+    # Pre-order enumerator of selected nodes
+    def preorder(*filter, this: true)
+      filter = self.class.filter(*filter)
+      Enumerator.new { |enum| do_preorder(enum, filter, this) }
+    end
+
+    # Post-order enumerator of selected nodes
+    def postorder(*filter, this: true) = raise NotImplementedError
 
     # Implementation of Enumerable#inject method
     def inject(default = nil, &block) = preorder.inject(default, &block)
@@ -76,48 +85,33 @@ module Tree
     # Enumerator of nodes in the tree
     alias_method :nodes, :filter
 
+    # Enumerator of edges in the tree. The edges are [previous-matching-node,
+    # matching-node] tuples
+    #
+    def edges(*filter, this: true, &block)
+      filter = self.class.filter(*filter)
+      if block_given?
+        do_edges(nil, filter, this, &block)
+      else
+        Pairs.new { |enum| do_edges(enum, filter, this) }
+      end
+    end
+
     # Return edges as from-node/to-node pairs where the from-node is selected
     # by the filter and the to-node is a descendant of the first node that
     # satisfies the given condition. The second node doesn't have to be matched
     # by the filter
     #
-    # TODO: Maybe change semantics so that 'edges(cond)' selects edges that
-    # match the condition
-    #
     # FIXME: Edges without a filter should do the expected
-    def edges(*filter, cond_expr, this: true, &block)
+    def pairs(*filter, cond_expr, this: true, &block)
       filter = self.class.filter(*filter)
       cond = Filter.mk_lambda(cond_expr)
       if block_given?
-        do_edges(nil, filter, this, cond, &block)
+        do_pairs(nil, filter, this, cond, &block)
       else
-        Pairs.new { |enum| do_edges(enum, filter, this, cond) }
+        Pairs.new { |enum| do_pairs(enum, filter, this, cond) }
       end
     end
-
-    # Like #filter but enumerates [previous-matching-node, matching-node]
-    # tuples. This can be used to build projected trees. See also #accumulate
-    #
-    # #pairs returns nil as the previous matching node for top-most matches.
-    # This is different from #edges
-    #
-    def pairs(*filter, this: true, &block)
-      filter = self.class.filter(*filter)
-      if block_given?
-        do_pairs(nil, filter, this, &block)
-      else
-        Pairs.new { |enum| do_pairs(enum, filter, this) }
-      end
-    end
-
-    # Pre-order enumerator of selected nodes
-    def preorder(*filter, this: true)
-      filter = self.class.filter(*filter)
-      Enumerator.new { |enum| do_preorder(enum, filter, this) }
-    end
-
-    # Post-order enumerator of selected nodes
-    def postorder(*filter, this: true) = raise NotImplementedError
 
     # Execute block on selected nodes. Effectively the same as
     # 'preorder(...).each(&block)' but faster as it doesn't create an
@@ -164,7 +158,7 @@ module Tree
 
   protected
     # +enum+ is unused (and unchecked) if a block is given
-    def do_pairs(enum, filter, this, last_match = nil, &block)
+    def do_edges(enum, filter, this, last_match = nil, &block)
       select, traverse = filter.match(self)
       if this && select
         if block_given?
@@ -174,10 +168,10 @@ module Tree
         end
         last_match = self
       end
-      children.each { |child| child.do_pairs(enum, filter, true, last_match, &block) } if traverse || !this
+      children.each { |child| child.do_edges(enum, filter, true, last_match, &block) } if traverse || !this
     end
 
-    def do_edges(enum, filter, this, cond, last_selected = nil, &block)
+    def do_pairs(enum, filter, this, cond, last_selected = nil, &block)
       select, traverse = filter.match(self)
       last_selected = self if this && select
       children.each { |child| 
@@ -188,7 +182,7 @@ module Tree
             enum << [last_selected, child]
           end
         else
-          child.do_edges(enum, filter, true, cond, last_selected, &block) 
+          child.do_pairs(enum, filter, true, cond, last_selected, &block) 
         end
       } if traverse || !this
     end
