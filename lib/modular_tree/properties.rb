@@ -24,7 +24,7 @@ module Tree
 
   module ParentProperty
     def parent = abstract_method
-    def parent=() abstract_method end
+    def parent=(arg) abstract_method end
   end
 
   module ChildrenProperty

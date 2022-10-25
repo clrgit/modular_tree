@@ -2,7 +2,7 @@
 describe "Implementations" do
   def mk_klass(*modules)
     Class.new(Tree::AbstractTree) do
-      include *modules
+      include *modules.reverse
       attr_reader :key
       def initialize(parent, key)
         @key = key
@@ -23,8 +23,8 @@ describe "Implementations" do
     end
   end
 
-  describe "ArrayImplementation" do
-    let(:tree) { mk_klass(Tree::ArrayImplementation) }
+  describe "InternalChildrenArrayImplementation" do
+    let(:tree) { mk_klass(Tree::InternalChildrenArrayImplementation) }
 
     it "defines #children" do
       r = tree.new(nil, "r")
@@ -39,8 +39,8 @@ describe "Implementations" do
     end
   end
 
-  describe "ListImplementation" do
-    let(:tree) { mk_klass(Tree::ListImplementation) }
+  describe "InternalChildrenListImplementation" do
+    let(:tree) { mk_klass(Tree::InternalChildrenListImplementation) }
 
     it "defines #children" do
       r = tree.new(nil, "r")
@@ -75,7 +75,13 @@ describe "Implementations" do
   end
 
   describe "InternalParentChildImplementation" do
-    let(:tree) { mk_klass(Tree::InternalParentChildImplementation, Tree::ArrayImplementation) }
+    let(:modules) { [
+      Tree::InternalParentImplementation, 
+      Tree::InternalChildrenArrayImplementation, 
+      Tree::InternalParentChildImplementation,
+    ] }
+
+    let(:tree) { mk_klass(*modules) }
 
     it "links parent and child" do
       r = tree.new(nil, "r")
@@ -95,7 +101,7 @@ describe "Implementations" do
 end
 
 #     Tree::ParentImplementation,
-#     Tree::ArrayImplementation #,
+#     Tree::InternalChildrenArrayImplementation #,
 #     Tree::ParentChildImplementation #,
 #     Tree::UpTreeAlgorithms,
 #     Tree::DownTreeAlgorithms

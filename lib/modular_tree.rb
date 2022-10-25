@@ -36,8 +36,9 @@ module Tree
   # A regular tree. Users of this library should derived their base class from Tree
   #
   class ArrayTree < AbstractTree # Aka. SetTree aka. Tree
+    include InternalParentImplementation
+    include InternalChildrenArrayImplementation
     include InternalParentChildImplementation
-    include ArrayImplementation
     include UpTreeAlgorithms
     include DownTreeAlgorithms
 
@@ -51,7 +52,7 @@ module Tree
   end
 
   class NestedArrayTree < AbstractTree
-    include ExternalArrayImplementation
+    include ExternalChildrenArrayImplementation
     include DownTreeAlgorithms
   end
 

@@ -61,7 +61,7 @@ module Tree
     def attach(child) = abstract_method
   end
 
-  module ExternalArrayImplementation
+  module ExternalChildrenArrayImplementation
     include NodeProperty
     include ChildrenImplementation
 
@@ -109,7 +109,7 @@ module Tree
   end
 
   # Demonstrates a linked list implementation
-  module ListImplementation
+  module InternalChildrenListImplementation
     include InternalChildrenImplementation
 
     attr_reader :first_child
@@ -138,7 +138,7 @@ module Tree
     attr_writer :next_sibling
   end
 
-  module ArrayImplementation
+  module InternalChildrenArrayImplementation
     include InternalChildrenImplementation
 
     attr_reader :children
@@ -153,7 +153,7 @@ module Tree
     def attach(child) = @children << child
   end
 
-  module HashImplementation
+  module InternalChildrenHashImplementation
     include InternalChildrenImplementation
 
     attr_reader :hash
@@ -167,8 +167,10 @@ module Tree
   end
 
   module InternalParentChildImplementation
-    include InternalParentImplementation
-    include InternalChildrenImplementation
+#   include InternalParentImplementation
+#   include InternalChildrenImplementation
+    include ParentProperty
+    include ChildrenProperty
 
     def initialize(parent)
       super
@@ -176,6 +178,7 @@ module Tree
     end
 
     def attach(child)
+      "attach"
       super(child)
       child.send(:parent=, self)
     end
