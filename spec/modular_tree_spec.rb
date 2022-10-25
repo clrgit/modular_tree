@@ -32,6 +32,9 @@ describe "Tree" do
       expect(a.children).to eq [b, c]
       expect(b.children).to eq []
     end
+    it "has parent-child link-up implementation" do
+      expect(true).to eq true # If we made it so far, then this test is a success
+    end
     it "has up-methods" do
       expect(root.ancestors).to eq []
       expect(a.ancestors).to eq [root]

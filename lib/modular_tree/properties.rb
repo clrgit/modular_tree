@@ -1,6 +1,9 @@
 
 module Tree
-  # A child node is not necessarily a tree, branches are
+  # A child node is not necessarily a tree, branches are, but they have to use
+  # #node to get the data
+  #
+  # Internal trees have child == branch
 
   module Property
     def initialize(_arg) end
@@ -21,11 +24,13 @@ module Tree
 
   module ParentProperty
     def parent = abstract_method
+    def parent=() abstract_method end
   end
 
   module ChildrenProperty
     def children = abstract_method
     def each_child(&block) = children.each(&block)
+    def attach(child) = abstract_method
   end
 
   module KeyProperty # Set

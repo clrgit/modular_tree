@@ -36,17 +36,13 @@ module Tree
   # A regular tree. Users of this library should derived their base class from Tree
   #
   class ArrayTree < AbstractTree # Aka. SetTree aka. Tree
-    include ParentImplementation
+    include InternalParentChildImplementation
     include ArrayImplementation
-    include ParentChildImplementation
     include UpTreeAlgorithms
     include DownTreeAlgorithms
 
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
-
-  # Default tree
-# Tree = ArrayTree
 
   class FilteredArrayTree < ArrayTree
     include DownTreeFilteredAlgorithms
@@ -54,17 +50,11 @@ module Tree
     def self.filter(*args) = FilteredDownTreeAlgorithms.filter(*args)
   end
 
-# exit
+  class NestedArrayTree < AbstractTree
+    include ExternalArrayImplementation
+    include DownTreeAlgorithms
+  end
 
-# class NestedArrayTree < AbstractTree
-#   include Tracker
-#   provide_module ChildrenProperty
-#
-#   use_module \
-#     MTree::ExternalTreeImplementation \
-#     MTree::DownTreeAlgorithms
-# end
-#
 # data = 
 #   ["root", [
 #     ["a", [

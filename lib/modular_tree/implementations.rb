@@ -45,7 +45,7 @@ module Tree
 
     def initialize(parent) = @parent = parent
 
-  protected
+# protected
     attr_writer :parent
   end
 
@@ -57,7 +57,7 @@ module Tree
     include ChildrenProperty
     include BranchesProperty
     include Implementation
-  protected
+# protected
     def attach(child) = abstract_method
   end
 
@@ -91,7 +91,7 @@ module Tree
       object
     end
 
-  protected
+# protected
     def attach(child) = array.last << child
   end
 
@@ -104,6 +104,8 @@ module Tree
 
     alias_method :branches, :children
     alias_method :each_branch, :each_child
+
+    def attach(child) = abstract_method
   end
 
   # Demonstrates a linked list implementation
@@ -131,7 +133,7 @@ module Tree
       @first_child = child
     end
 
-  protected
+# protected
     attr_writer :first_child
     attr_writer :next_sibling
   end
@@ -164,7 +166,7 @@ module Tree
     end
   end
 
-  module ParentChildImplementation
+  module InternalParentChildImplementation
     include InternalParentImplementation
     include InternalChildrenImplementation
 

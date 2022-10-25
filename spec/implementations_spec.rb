@@ -74,8 +74,8 @@ describe "Implementations" do
     end
   end
 
-  describe "ParentChildImplementation" do
-    let(:tree) { mk_klass(Tree::ParentChildImplementation, Tree::ArrayImplementation) }
+  describe "InternalParentChildImplementation" do
+    let(:tree) { mk_klass(Tree::InternalParentChildImplementation, Tree::ArrayImplementation) }
 
     it "links parent and child" do
       r = tree.new(nil, "r")
@@ -84,7 +84,7 @@ describe "Implementations" do
       expect(a.parent).to eq r
     end
 
-    it "redefine ChildrenImplementation#attach" do
+    it "redefine #attach" do
       r = tree.new(nil, "r")
       a = tree.new(nil, "a")
       r.attach(a)
