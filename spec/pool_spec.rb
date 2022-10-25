@@ -1,7 +1,7 @@
 
 describe "Pool" do
   let(:klass) {
-    Class.new(Tree::Tree) do
+    Class.new(Tree::ArrayTree) do
       include Tree::KeyProperty
       include Tree::PathAlgorithms
       include Tree::Pool

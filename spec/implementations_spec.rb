@@ -2,8 +2,7 @@
 describe "Implementations" do
   def mk_klass(*modules)
     Class.new(Tree::AbstractTree) do
-      include Tree::Tracker
-      use_module *modules
+      include *modules
       attr_reader :key
       def initialize(parent, key)
         @key = key
@@ -14,7 +13,7 @@ describe "Implementations" do
   end
 
   describe "ParentImplementation" do
-    let(:tree) { mk_klass(Tree::ParentImplementation) }
+    let(:tree) { mk_klass(Tree::InternalParentImplementation) }
 
     it "defines #parent" do
       r = tree.new(nil, "r")

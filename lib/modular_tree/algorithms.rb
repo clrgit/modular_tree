@@ -1,13 +1,13 @@
-require_relative "dependencies"
 
 module Tree
+
   # A down tree can only be traversed bottom-up
   #
   # TODO: Add FilteredUpTreeAlgorithms
   #
   module UpTreeAlgorithms
-    include Tracker
-    require_module NodeProperty, BranchProperty
+    include NodeProperty
+    include BranchProperty
 
     # Bottom-up
     def ancestors
@@ -39,8 +39,8 @@ module Tree
   # TODO: Better split between DownTreeAlgorithms and DownTreeFilteredAlgorithms
   #
   module DownTreeFilteredAlgorithms
-    include Tracker
-    require_module NodeProperty, BranchesProperty
+    include NodeProperty
+    include BranchesProperty
 
     # True if the node doesn't contain any children
     def empty? = children.empty?
@@ -245,14 +245,12 @@ module Tree
   end
 
   module DownTreeAlgorithms
-    include Tracker
     include DownTreeFilteredAlgorithms
-    require_module DownTreeFilteredAlgorithms
 
-    def self.included(other)
-      other.include DownTreeFilteredAlgorithms
-      super
-    end
+#   def self.included(other)
+#     other.include DownTreeFilteredAlgorithms
+#     super
+#   end
 
     def self.filter(*args) = DownTreeFilteredAlgorithms.filter(*args)
 
@@ -273,8 +271,8 @@ module Tree
   end
 
   module PathAlgorithms
-    include Tracker
-    require_module KeyProperty, UpTreeAlgorithms
+    include KeyProperty
+    include UpTreeAlgorithms
 
     def separator = @separator ||= parent&.separator || ::Tree.separator
     def separator=(s) @separator = s end
@@ -284,8 +282,7 @@ module Tree
   end
 
   module DotAlgorithms
-    include Tracker
-    require_module KeysProperty
+    include KeysProperty
 
     def dot(path) = Separator.split(path).keys.each.inject(self) { |a,e| a[e] }
   end

@@ -6,7 +6,6 @@ include Constrain
 require 'forward_to'
 include ForwardTo
 
-require_relative "modular_tree/dependencies"
 require_relative "modular_tree/version"
 require_relative "modular_tree/separator"
 require_relative "modular_tree/filter"
@@ -37,14 +36,11 @@ module Tree
   # A regular tree. Users of this library should derived their base class from Tree
   #
   class ArrayTree < AbstractTree # Aka. SetTree aka. Tree
-    include Tracker
-
-    use_module \
-        Tree::ParentImplementation,
-        Tree::ArrayImplementation,
-        Tree::ParentChildImplementation,
-        Tree::UpTreeAlgorithms,
-        Tree::DownTreeAlgorithms
+    include ParentImplementation
+    include ArrayImplementation
+    include ParentChildImplementation
+    include UpTreeAlgorithms
+    include DownTreeAlgorithms
 
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
@@ -53,10 +49,7 @@ module Tree
 # Tree = ArrayTree
 
   class FilteredArrayTree < ArrayTree
-    include Tracker
-
-    use_module \
-        ::Tree::DownTreeFilteredAlgorithms
+    include DownTreeFilteredAlgorithms
 
     def self.filter(*args) = FilteredDownTreeAlgorithms.filter(*args)
   end

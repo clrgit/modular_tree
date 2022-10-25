@@ -21,31 +21,22 @@
 
 module Tree
   module Implementation
-    include Tracker
-    abstract_module
-
-    provide_module NodeProperty
+    include NodeProperty
+    def initialize(_arg) end
   end
 
   module InternalImplementation
-    include Tracker
-    abstract_module
-    provide_module NodeProperty
-    
+    include Implementation
     def node = self
   end
 
   module ParentImplementation
-    include Tracker
+    include ParentProperty
+    include BranchProperty
     include Implementation
-
-    abstract_module
-    provide_module BranchProperty
-    provide_module ParentProperty
   end
 
   module InternalParentImplementation
-    include Tracker
     include InternalImplementation
     include ParentImplementation
 
@@ -59,36 +50,23 @@ module Tree
   end
 
   module ExternalParentImplementation
-    include Tracker
     include ParentImplementation
-
-    abstract_module
   end
 
   module ChildrenImplementation
-    include Tracker
+    include ChildrenProperty
+    include BranchesProperty
     include Implementation
-
-    abstract_module
-    provide_module ChildrenProperty
-    provide_module BranchesProperty
-
   protected
     def attach(child) = abstract_method
   end
 
   module ExternalArrayImplementation
-    include Tracker
+    include NodeProperty
     include ChildrenImplementation
 
-    provide_module NodeProperty
-
-    attr_accessor :array # Initialized where?
-
-    attr_accessor :nodes # Array of nodes. Aka. 'children'
-
-
-    def this = array.first
+    def node = array
+    attr_accessor :array
 
     def children = array.second.map(&:first)
     def branches = Enumerator.new { |enum| each_branch { |branch| enum << branch } }
@@ -118,12 +96,11 @@ module Tree
   end
 
   module InternalChildrenImplementation
-    include Tracker
     include InternalImplementation
     include ChildrenImplementation
 
-    def children = abstract_method # Repeated here because provide_module is not executed yet
-    def each_child = abstract_method
+#   def children = abstract_method # Repeated here because provide_module is not executed yet
+#   def each_child = abstract_method
 
     alias_method :branches, :children
     alias_method :each_branch, :each_child
@@ -131,7 +108,6 @@ module Tree
 
   # Demonstrates a linked list implementation
   module ListImplementation
-    include Tracker
     include InternalChildrenImplementation
 
     attr_reader :first_child
@@ -161,7 +137,6 @@ module Tree
   end
 
   module ArrayImplementation
-    include Tracker
     include InternalChildrenImplementation
 
     attr_reader :children
@@ -190,8 +165,8 @@ module Tree
   end
 
   module ParentChildImplementation
-    include Tracker
-    require_module ParentImplementation, InternalChildrenImplementation
+    include InternalParentImplementation
+    include InternalChildrenImplementation
 
     def initialize(parent)
       super

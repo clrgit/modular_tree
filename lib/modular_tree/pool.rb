@@ -1,7 +1,6 @@
 module Tree
   module Pool
-    include Tracker
-    require_module PathAlgorithms
+    include PathAlgorithms
 
     def self.included(other)
       other.extend(ClassMethods)

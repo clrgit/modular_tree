@@ -1,6 +1,6 @@
 
 describe "Tree::Filter" do
-  class SomeNode < Tree::Tree
+  class SomeNode < Tree::ArrayTree
     def yes? = true
     def no? = false
   end

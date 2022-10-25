@@ -5,7 +5,7 @@ describe "Tree" do
 
   describe "Tree" do
     let(:klass) {
-      Class.new(Tree::Tree) do
+      Class.new(Tree::ArrayTree) do
         attr_reader :name
         def initialize(parent, name)
           @name = name
