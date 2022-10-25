@@ -40,17 +40,17 @@ module Tree
     include Tracker
 
     use_module \
-        ::Tree::ParentImplementation,
-        ::Tree::ArrayImplementation,
-        ::Tree::ParentChildImplementation,
-        ::Tree::UpTreeAlgorithms,
-        ::Tree::DownTreeAlgorithms
+        Tree::ParentImplementation,
+        Tree::ArrayImplementation,
+        Tree::ParentChildImplementation,
+        Tree::UpTreeAlgorithms,
+        Tree::DownTreeAlgorithms
 
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
 
   # Default tree
-  Tree = ArrayTree
+# Tree = ArrayTree
 
   class FilteredArrayTree < ArrayTree
     include Tracker
@@ -65,19 +65,11 @@ module Tree
 
 # class NestedArrayTree < AbstractTree
 #   include Tracker
-#
 #   provide_module ChildrenProperty
 #
 #   use_module \
-#     ::Tree::ExternalDownTreeAlgorithms
-#
-#
-#   def initialize(array)
-#     super(nil)
-#   end
-#
-#   def node(node) = node.first
-#   def children(node) = node.last
+#     MTree::ExternalTreeImplementation \
+#     MTree::DownTreeAlgorithms
 # end
 #
 # data = 
@@ -93,6 +85,8 @@ module Tree
 #
 # tree = NestedArrayTree.new(data)
 # tree.visit { ... }
+#
+# tree.traverse { before(); yield; after() }
 #
 # NestedArrayTree.visit(data) { ... }
 #

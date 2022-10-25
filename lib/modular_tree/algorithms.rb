@@ -7,13 +7,13 @@ module Tree
   #
   module UpTreeAlgorithms
     include Tracker
-    require_module ParentProperty
+    require_module NodeProperty, BranchProperty
 
     # Bottom-up
     def ancestors
       curr = self
       a = []
-      a.push curr while curr = curr.parent
+      a.push curr.node while curr = curr.branch
       a
     end
 
@@ -21,13 +21,12 @@ module Tree
     def ancestry
       curr = self
       a = []
-      a.unshift curr while curr = curr.parent
+      a.unshift curr.node while curr = curr.branch
       a
     end
 
     def depth = @depth ||= ancestors.size
   end
-
 
   # A down tree can only be traversed top-down as it has no reference to its
   # parent. It is also a kind of a graph node
@@ -41,7 +40,7 @@ module Tree
   #
   module DownTreeFilteredAlgorithms
     include Tracker
-    require_module ChildrenProperty
+    require_module NodeProperty, BranchesProperty
 
     # True if the node doesn't contain any children
     def empty? = children.empty?
@@ -60,6 +59,34 @@ module Tree
     # Implementation of Enumerable#map
     def map(&block) = preorder.map(&block)
 
+    # Nomenclature
+    #   parent, children, this # Does not necessarily contain tree-information
+    #   branch, branches, node # Contains tree information
+    #
+    #   #this # Returns node without tree-information
+    #   #node # Returns node with tree-information
+    #
+    #   #self -> acts as if it is a container of children
+    #   #each(&block) -> iterate all descendant children
+    #   #each_child(&block) -> iterate immediate children
+    #
+    #   #nodes -> a container of nodes
+    #   #each_node(&block) -> iterate all descendant nodes
+    #   #each_branch(&block) -> iterate immediate branches
+
+    # Like #each but with filters
+    def filter(*filter, this: true, &block) 
+      filter = self.class.filter(*filter)
+      if block_given?
+        do_filter(nil, filter, this, &block)
+      else
+        Enumerator.new { |enum| do_filter(enum, filter, this) }
+      end
+    end
+
+    # Enumerator of nodes in the tree matching the filter. Aka. 'filter'
+    alias_method :nodes, :filter
+
     # Pre-order enumerator of selected nodes
     def preorder(*filter, this: true)
       filter = self.class.filter(*filter)
@@ -72,20 +99,13 @@ module Tree
     # Implementation of Enumerable#inject method
     def inject(default = nil, &block) = preorder.inject(default, &block)
 
-    # Like #each but with filters
-    def filter(*filter, this: true, &block) 
-      filter = self.class.filter(*filter)
-      if block_given?
-        do_filter(nil, filter, this, &block)
-      else
-        Enumerator.new { |enum| do_filter(enum, filter, this) }
-      end
-    end
+#   def traverse(&block)
+#     before()
+#     yield(&block)
+#     after()
+#   end
 
-    # Enumerator of nodes in the tree
-    alias_method :nodes, :filter
-
-    # Enumerator of edges in the tree. The edges are [previous-matching-node,
+    # Enumerator of edges in the tree. Edges are [previous-matching-node,
     # matching-node] tuples
     #
     def edges(*filter, this: true, &block)
@@ -157,18 +177,24 @@ module Tree
     end
 
   protected
+    def do_preorder(enum, filter, this)
+      select, traverse = filter.match(self)
+      enum << self if this && select
+      each_branch { |branch| branch.do_preorder(enum, filter, true) } if traverse || !this
+    end
+
     # +enum+ is unused (and unchecked) if a block is given
     def do_edges(enum, filter, this, last_match = nil, &block)
-      select, traverse = filter.match(self)
+      select, traverse = filter.match(node)
       if this && select
         if block_given?
-          yield(last_match, self)
+          yield(last_match, node)
         else
-          enum << [last_match, self]
+          enum << [last_match, node]
         end
-        last_match = self
+        last_match = node
       end
-      children.each { |child| child.do_edges(enum, filter, true, last_match, &block) } if traverse || !this
+      each_branch { |branch| branch.do_edges(enum, filter, true, last_match, &block) } if traverse || !this
     end
 
     def do_pairs(enum, filter, this, cond, last_selected = nil, &block)
@@ -199,12 +225,6 @@ module Tree
       children.each { |child| child.do_filter(enum, filter, true, &block) } if traverse || !this
     end
 
-    def do_preorder(enum, filter, this)
-      select, traverse = filter.match(self)
-      enum << self if this && select
-      children.each { |child| child.do_preorder(enum, filter, true) } if traverse || !this
-    end
-
     def do_visit(filter, this, &block)
       select, traverse = filter.match(self)
       yield(self) if this && select
@@ -226,6 +246,7 @@ module Tree
 
   module DownTreeAlgorithms
     include Tracker
+    include DownTreeFilteredAlgorithms
     require_module DownTreeFilteredAlgorithms
 
     def self.included(other)

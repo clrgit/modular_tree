@@ -55,7 +55,13 @@ module Tree
           provided_modules(m) + required_modules(m).map { |rm| all_provided_modules(rm) }.flatten
     end
 
-    # FIXME: Does order-of-inclusion matter anymore? 
+
+
+
+
+    # FIXME: Does order-of-inclusion matter anymore? The question is if the
+    # no-abstract-methods-in-use-classes rule prevents implementations of
+    # methods from being shadowed by abstract methods
     def self.use_module(m, *modules)
       constrain m, Module
       modules = Array(modules).flatten
@@ -65,23 +71,48 @@ module Tree
             raise ArgumentError, "Module '#{m}' does not include Tree::Tracker" 
       }
 
-#     puts "use_module(#{m.inspect}, #{modules.inspect})"
-#     indent {
-        all_required_modules = modules.map { |m| [m, recursively_required_modules(m)] }.flatten.uniq
-        all_provided_modules = 
-            (m.ancestors + [m] + modules).map { |m| all_provided_modules(m) }.flatten.uniq
+      puts "use_module #{m.inspect}"
+      indent {
+        puts "use"
+        indent { puts modules }
+
+        all_used_modules = modules.map { |m| 
+          m.ancestors + m.included_modules
+        }.flatten.reject { |m| m == Tree::Tracker }.sort { |l,r| l.to_s <=> r.to_s }.uniq
+
+        puts "all_used_modules"
+        indent { puts all_used_modules }
+
+        all_required_modules = all_used_modules.map { |m|
+          required_modules(m)
+        }.flatten.uniq
+
+        puts "all_required_modules"
+        indent { puts all_required_modules }
+
+        all_provided_modules = all_used_modules.map { |m|
+          [m, provided_modules(m)]
+        }.flatten.uniq
+
+        puts "all_provided_modules"
+        indent { puts all_provided_modules }
+
         diff = all_required_modules - all_provided_modules
 
-#       puts "all_required_modules: #{all_required_modules.inspect}"
-#       puts "all_provided_modules: #{all_provided_modules.inspect}"
-#       puts "diff: #{diff.inspect}"
-        diff.empty? or raise ArgumentError, "Needs modules #{diff.join(', ')}"
-
-        use_modules = all_required_modules.select { |m| !abstract?(m) }
-#       puts "use_modules: #{use_modules.inspect}"
+        if diff.empty?
+          puts "diff is empty"
+        else
+          puts "diff"
+          indent { puts diff }
+          raise ArgumentError, "Can't find required modules #{diff.inspect}"
+        end
 
         sorted_modules = sort_modules(all_provided_modules)
-#       puts "sorted: #{sorted_modules.inspect}"
+
+        puts "sorted_modules"
+        indent { puts sorted_modules }
+
+        exit
 
         # Substitute provided modules with the provider and remove duplicates
         resolved_modules = sorted_modules.map { |m|
@@ -97,7 +128,7 @@ module Tree
           r     
         }.uniq
 
-#       puts "resolved: #{resolved_modules.inspect}"
+        puts "resolved: #{resolved_modules.inspect}"
 
         # List of modules to include
         include_modules = resolved_modules & use_modules
@@ -132,7 +163,7 @@ module Tree
 #       include_modules.reverse.each { |im| m.include(im) }
 
 #       # Include modules
-#       puts "include: #{include_modules.inspect}"
+        puts "include: #{include_modules.inspect}"
         include_modules.each { |im| m.include(im) }
 
 
@@ -141,7 +172,7 @@ module Tree
 
 
 
-#     }
+      }
     end
 
   end
