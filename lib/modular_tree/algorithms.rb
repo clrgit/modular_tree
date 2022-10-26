@@ -239,7 +239,8 @@ module Tree
 
     def do_aggregate(filter, this, &block)
       select, traverse = filter.match(self)
-      values = traverse ? children.map { |child| child.do_aggregate(filter, true, &block) } : []
+      values = traverse ? branches.map { |branch| branch.do_aggregate(filter, true, &block) } : []
+#     values = traverse ? children.map { |child| child.do_aggregate(filter, true, &block) } : []
       yield(self, values)
     end
   end

@@ -33,7 +33,7 @@ module Tree
     def size = abstract_method
   end
 
-  # A regular tree. Users of this library should derived their base class from Tree
+  # A regular tree
   #
   class ArrayTree < AbstractTree # Aka. SetTree aka. Tree
     include InternalParentImplementation
@@ -54,6 +54,13 @@ module Tree
   class NestedArrayTree < AbstractTree
     include ExternalChildrenArrayImplementation
     include DownTreeAlgorithms
+
+    def initialize(array)
+      super(nil)
+      self.array = array
+    end
+
+    def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
 
 # data = 

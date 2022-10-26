@@ -3,7 +3,7 @@ describe "Tree" do
     expect(Tree::VERSION).not_to be_nil
   end
 
-  describe "Tree" do
+  describe "ArrayTree" do
     let(:klass) {
       Class.new(Tree::ArrayTree) do
         attr_reader :name
@@ -48,6 +48,43 @@ describe "Tree" do
       expect(s).to eq "root(a(b,c),d(e))"
     end
   end
+
+  describe "NestedArrayTree" do
+    let(:klass) {
+      Class.new(Tree::NestedArrayTree) do
+        def to_s = array.first
+      end
+    }
+
+    let!(:data) {
+      ["root", [
+        ["a", [
+          ["b", []],
+          ["c", []]
+        ]],
+        ["d", [
+          ["e", []],
+        ]]
+      ]]
+    }
+
+    let!(:root) { klass.new(data) }
+
+     
+    it "has children array implementation" do
+      expect(root.children).to eq %w(a d)
+      expect(root.branches.to_a.map(&:to_s)).to eq %w(a d)
+    end
+
+    it "has down methods" do
+      s = root.aggregate { |node, values|
+        values = values.empty? ? "" : "(#{values.join(',')})"
+        "#{node}#{values}" 
+      }
+      expect(s).to eq "root(a(b,c),d(e))"
+    end
+  end
+
 end
 
 __END__

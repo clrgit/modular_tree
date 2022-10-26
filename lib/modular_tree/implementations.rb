@@ -66,22 +66,24 @@ module Tree
     include ChildrenImplementation
 
     def node = array
+    def this = array.first
+
     attr_accessor :array
 
-    def children = array.second.map(&:first)
+    def children = array.last.map(&:first)
     def branches = Enumerator.new { |enum| each_branch { |branch| enum << branch } }
 
-    def each_child(&block) = array.second.each { |*node| yield(*node) }
-
+    def each_child(&block) = array.last.each { |*node| yield(*node) }
 #   def each_child(&block) = array.second.each { |node| yield(*node, self) } # Actually possible
-
-    def each_child(&block) = array.second.each(&:first)
+#   def each_child(&block) = array.last.each(&:first)
 
     def each_branch(&block)
-      impl = self.new
-      array.second.map { |node|
-        impl.array = node
-        yield impl
+      impl = self.class.new(nil)
+      array.last.map { |node|
+#       puts "considering #{node.inspect}"
+#       impl.array = node
+#       puts impl
+        yield self.class.new(node)
       }
     end
 
@@ -102,8 +104,11 @@ module Tree
 #   def children = abstract_method # Repeated here because provide_module is not executed yet
 #   def each_child = abstract_method
 
-    alias_method :branches, :children
-    alias_method :each_branch, :each_child
+#   alias_method :branches, :children
+#   alias_method :each_branch, :each_child
+
+    def branches = children
+    def each_branch = each_child
 
     def attach(child) = abstract_method
   end
