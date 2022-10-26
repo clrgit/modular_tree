@@ -42,8 +42,8 @@ module Tree
     include NodeProperty
     include BranchesProperty
 
-    # True if the node doesn't contain any children
-    def empty? = children.empty?
+    # True if the node doesn't contain any branches
+    def empty? = branches.empty?
 
     # The number of nodes in the tree. Note that this can be an expensive
     # operation since every node that to be visited
@@ -60,15 +60,15 @@ module Tree
     def map(&block) = preorder.map(&block)
 
     # Nomenclature
-    #   parent, children, this # Does not necessarily contain tree-information
+    #   parent, branches, this # Does not necessarily contain tree-information
     #   branch, branches, node # Contains tree information
     #
     #   #this # Returns node without tree-information
     #   #node # Returns node with tree-information
     #
-    #   #self -> acts as if it is a container of children
-    #   #each(&block) -> iterate all descendant children
-    #   #each_child(&block) -> iterate immediate children
+    #   #self -> acts as if it is a container of branches
+    #   #each(&block) -> iterate all descendant branches
+    #   #each_child(&block) -> iterate immediate branches
     #
     #   #nodes -> a container of nodes
     #   #each_node(&block) -> iterate all descendant nodes
@@ -145,7 +145,7 @@ module Tree
     # Traverse the tree top-down while accumulating information in an
     # accumulator object. The block takes a [accumulator, node] tuple and is
     # responsible for adding itself to the accumulator. The return value from
-    # the block is then used as the accumulator for the child nodes. Note that
+    # the block is then used as the accumulator for the branch nodes. Note that
     # it returns the original accumulator and not the final result - this makes
     # it different from #inject
     def accumulate(*filter, accumulator, this: true, &block)
@@ -156,7 +156,7 @@ module Tree
     end
 
     # Traverse the tree bottom-up while aggregating information. The block is
-    # called with a [current-node, child-node-results] tuple
+    # called with a [current-node, branch-node-results] tuple
     def aggregate(*filter, this: true, &block)
       filter = self.class.filter(*filter)
       do_aggregate(filter, this, &block)
@@ -200,15 +200,15 @@ module Tree
     def do_pairs(enum, filter, this, cond, last_selected = nil, &block)
       select, traverse = filter.match(self)
       last_selected = self if this && select
-      children.each { |child| 
-        if last_selected && cond.call(child)
+      branches.each { |branch| 
+        if last_selected && cond.call(branch)
           if block_given?
-            yield(last_selected, child)
+            yield(last_selected, branch)
           else
-            enum << [last_selected, child]
+            enum << [last_selected, branch]
           end
         else
-          child.do_pairs(enum, filter, true, cond, last_selected, &block) 
+          branch.do_pairs(enum, filter, true, cond, last_selected, &block) 
         end
       } if traverse || !this
     end
@@ -222,19 +222,19 @@ module Tree
           enum << self
         end
       end
-      children.each { |child| child.do_filter(enum, filter, true, &block) } if traverse || !this
+      branches.each { |branch| branch.do_filter(enum, filter, true, &block) } if traverse || !this
     end
 
     def do_visit(filter, this, &block)
       select, traverse = filter.match(self)
       yield(self) if this && select
-      children.each { |child| child.do_visit(filter, true, &block) } if traverse || !this
+      branches.each { |branch| branch.do_visit(filter, true, &block) } if traverse || !this
     end
 
     def do_accumulate(filter, this, acc, &block)
       select, traverse = filter.match(self)
       acc = yield(acc, self) if this && select
-      children.each { |child| child.do_accumulate(filter, true, acc, &block) } if traverse || !this
+      branches.each { |branch| branch.do_accumulate(filter, true, acc, &block) } if traverse || !this
     end
 
     def do_aggregate(filter, this, &block)
