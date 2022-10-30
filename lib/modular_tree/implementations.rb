@@ -70,21 +70,28 @@ module Tree
 
     attr_accessor :array
 
-    def children = array.last.map(&:first)
+    def children = @array.last.map(&:first)
     def branches = Enumerator.new { |enum| each_branch { |branch| enum << branch } }
 
-    def each_child(&block) = array.last.each { |*node| yield(*node) }
+    def each_child(&block) = @array.last.each { |*node| yield(*node) }
 #   def each_child(&block) = array.second.each { |node| yield(*node, self) } # Actually possible
 #   def each_child(&block) = array.last.each(&:first)
 
     def each_branch(&block)
-      impl = self.class.new(nil)
-      array.last.map { |node|
-#       puts "considering #{node.inspect}"
-#       impl.array = node
-#       puts impl
-        yield self.class.new(node)
-      }
+#     impl = self.class.new(nil)
+      @array.last.map { |node| yield self.class.new(node) }
+    end
+
+    def each_edge(&block)
+      @array.last.map { |node| yield self, self.class.new(node) }
+    end
+
+    def each(&block)
+      @array.last.map.with_index { |node, i| yield i, self.class.new(node) }
+    end
+
+    def each_node(&block)
+      @array.last.map.with_index { |node, i| yield self, i, self.class.new(node) }
     end
 
     def self.new(array)
@@ -183,7 +190,6 @@ module Tree
     end
 
     def attach(child)
-      "attach"
       super(child)
       child.send(:parent=, self)
     end

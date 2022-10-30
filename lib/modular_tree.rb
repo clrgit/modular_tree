@@ -63,6 +63,14 @@ module Tree
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
 
+  def self.aggregate(arg, *args, &block)
+    case arg
+      when Array; NestedArrayTree.new(arg).aggregate(*args, &block)
+    else
+      raise ArgumentError
+    end
+  end
+
 # data = 
 #   ["root", [
 #     ["a", [

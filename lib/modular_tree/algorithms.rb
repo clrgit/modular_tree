@@ -106,12 +106,33 @@ module Tree
 #   end
 
     # Enumerator of edges in the tree. Edges are [previous-matching-node,
-    # matching-node] tuples
+    # matching-node] tuples. Top-level nodes have previous-matching-node set to
+    # nil
     #
     def edges(*filter, this: true, &block)
       filter = self.class.filter(*filter)
       if block_given?
         do_edges(nil, filter, this, &block)
+        
+#       case block.arity
+#         when 0; do_edges_0(nil, filter, this, &block)
+#         when 1; do_edges_1(nil, filter, this, &block)
+#         when 2; do_edges_2(nil, filter, this, &block)
+#         when 3; do_edges_3(nil, filter, this, &block)
+#       else
+#         raise ArgumentError
+#       end
+#
+#       do_edges(nil, filter, this) { |parent, key, node|
+#         case block.arity
+#           when 0; yield
+#           when 1; yield(node)
+#           when 2; yield(key, node)
+#           when 3; yield(parent, key, node)
+#         else
+#           raise ArgumentError
+#         end
+#       }
       else
         Pairs.new { |enum| do_edges(enum, filter, this) }
       end
@@ -213,6 +234,8 @@ module Tree
       } if traverse || !this
     end
 
+    # filter.children(self)
+
     def do_filter(enum, filter, this, &block)
       select, traverse = filter.match(self)
       if this && select
@@ -237,7 +260,7 @@ module Tree
       branches.each { |branch| branch.do_accumulate(filter, true, acc, &block) } if traverse || !this
     end
 
-    def do_aggregate(filter, this, &block)
+    def do_aggregate(filter, this, &block) # TODO: use select-status
       select, traverse = filter.match(self)
       values = traverse ? branches.map { |branch| branch.do_aggregate(filter, true, &block) } : []
 #     values = traverse ? children.map { |child| child.do_aggregate(filter, true, &block) } : []

@@ -42,49 +42,56 @@ describe "Tree" do
     end
     it "has down-methods" do
       s = root.aggregate { |node, values| 
-        values = values.empty? ? "" : "(#{values.join(',')})"
-        "#{node}#{values}" 
+        "#{node}#{values.empty? ? "" : "(#{values.join(',')})"}"
       }
       expect(s).to eq "root(a(b,c),d(e))"
     end
   end
 
   describe "NestedArrayTree" do
-    let(:klass) {
+    let(:klass) { # This also demonstrates mounting of a class on a nested array
       Class.new(Tree::NestedArrayTree) do
         def to_s = array.first
       end
     }
 
-    let!(:data) {
-      ["root", [
-        ["a", [
-          ["b", []],
-          ["c", []]
-        ]],
-        ["d", [
-          ["e", []],
-        ]]
-      ]]
-    }
+    let!(:e) { ["e", []] }
+    let!(:d) { ["d", [e]] }
+    let!(:c) { ["c", []] }
+    let!(:b) { ["b", []] }
+    let!(:a) { ["a", [b, c]] }
+    let!(:r) { ["root", [a, d]] }
 
-    let!(:root) { klass.new(data) }
-
+    let!(:root) { klass.new(r) }
      
     it "has children array implementation" do
       expect(root.children).to eq %w(a d)
-      expect(root.branches.to_a.map(&:to_s)).to eq %w(a d)
+      expect(root.branches.to_a.map(&:array)).to eq [a, d]
     end
 
     it "has down methods" do
       s = root.aggregate { |node, values|
-        values = values.empty? ? "" : "(#{values.join(',')})"
-        "#{node}#{values}" 
+        "#{node}#{values.empty? ? "" : "(#{values.join(',')})"}"
       }
       expect(s).to eq "root(a(b,c),d(e))"
     end
   end
 
+  describe "Tree" do
+    let!(:e) { ["e", []] }
+    let!(:d) { ["d", [e]] }
+    let!(:c) { ["c", []] }
+    let!(:b) { ["b", []] }
+    let!(:a) { ["a", [b, c]] }
+    let!(:r) { ["root", [a, d]] }
+
+    it "defines Tree.aggregate" do
+      s = Tree.aggregate(r) { |node, values|
+        "#{node.this}#{values.empty? ? "" : "(#{values.join(',')})"}"
+      }
+      expect(s).to eq "root(a(b,c),d(e))"
+    end
+  end
 end
 
 __END__
