@@ -69,7 +69,7 @@ module Tree
 
     def node = array
     def this = array.first
-    def value = array.first
+    def value = array.first # FIXME What is this? It is a problem several places
 
     attr_accessor :array
 

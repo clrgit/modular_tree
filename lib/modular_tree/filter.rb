@@ -6,9 +6,9 @@ module Tree
     # traverse expression decides if the child nodes should be traversed
     # recursively
     #
-    # The expressions can be a Proc, Symbol, or an array of classes. In
-    # addition, +select+ can also be true, and +traverse+ can be true,
-    # false, or nil. True, false, and nil have special meanings:
+    # The expressions can be a Proc, Symbol, Class, or an array of classes. In
+    # addition, +select+ can be true, and +traverse+ can be true, false, or
+    # nil. These values have special meanings:
     #
     #   when +select+ is
     #     true    Select always. This is the default
@@ -17,14 +17,17 @@ module Tree
     #     true    Traverse always. This is the default
     #     false   Traverse only if select didn't match
     #     nil     Expects +select+ to return a two-tuple of booleans. Can't be
-    #             used when +select+ is true
+    #             used when +select+ is true. TODO: Explain
     #
     # If the expression is a Proc object, it will be called with the current
     # node as argument. If the return value is true, the node is
     # selected/traversed and skipped otherwise. If the expression is a method
     # name (Symbol), the method will be called on each node with no arguments.
-    # It is not an error if the method doesn't exists but the node is not
-    # selected/traversed
+    # It is not an error if the method doesn't exists on the a given node but
+    # the node is not selected/traversed
+    #
+    # If the expression is a class or an array of classes, a given node matches
+    # if it is an instance of one of the classes or any subclass
     #
     # Filters should not have side-effects because they can be used in
     # enumerators that doesn't execute the filter unless the enumerator is
