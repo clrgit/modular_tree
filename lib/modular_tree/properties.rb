@@ -36,6 +36,10 @@ module Tree
     def attach(child) = abstract_method
   end
 
+  # TODO
+  module ParentChildProperty
+  end
+
   module KeyProperty # Set
     def key = abstract_method
   end

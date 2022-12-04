@@ -172,6 +172,20 @@ module Tree
     def insert(where, child) = insert_append(:insert, where, child)
     def append(where, child) = insert_append(:append, where, child)
 
+    def replace(where, *children)
+      children = Array(children).flatten
+      case where
+        when Integer
+          subject = @children[where] or raise ArgumentError
+          index = where
+        else
+          subject = where
+          index = @children.index(where) or raise ArgumentError
+      end
+      @children = @children[0...index] + children + @children[index + 1..-1]
+      subject
+    end
+
   protected
     def insert_append(which, where, child)
       if !where.is_a?(Integer)
@@ -224,17 +238,15 @@ module Tree
       super
       child.send(:parent=, self)
     end
+
+    # Requires that Child classes already has defined this
+    def replace(where, *children)
+      children = Array(children).flatten
+      subject = super(where, children)
+      subject.send(:parent=, nil)
+      children.each { |child| child.send(:parent=, self) }
+      subject
+    end
   end
 end
-
-
-
-
-
-
-
-
-
-
-
 

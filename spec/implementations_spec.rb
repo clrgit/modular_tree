@@ -175,6 +175,24 @@ describe "Implementations" do
         end
       end
     end
+
+    describe "replace" do
+      it "replaces a node" do
+        root.replace(d, f = tree.new(nil, "f"))
+        expect(root.children).to eq [a, f]
+      end
+      context "it inserts multiple nodes" do
+        it "when given a list of nodes" do
+          root.replace(d, f = tree.new(nil, "f"), g = tree.new(nil, "g"))
+          expect(root.children).to eq [a, f, g]
+        end
+        it "when given an array of nodes" do
+          arr = [f = tree.new(nil, "f"), g = tree.new(nil, "g")]
+          root.replace(d, arr)
+          expect(root.children).to eq [a, f, g]
+        end
+      end
+    end
   end
 end
 
