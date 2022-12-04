@@ -98,6 +98,84 @@ describe "Implementations" do
       expect(a.parent).to eq r
     end
   end
+
+  describe "InternalParentChildArrayImplementation" do
+    let(:modules) { [
+      Tree::InternalParentImplementation, 
+      Tree::InternalChildrenArrayImplementation, 
+      Tree::InternalParentChildArrayImplementation,
+    ] }
+
+    let(:tree) { mk_klass(*modules) }
+    let!(:root) { tree.new(nil, "root") }
+    let!(:a) { tree.new(root, "a") }
+    let!(:b) { tree.new(a, "b") }
+    let!(:c) { tree.new(a, "c") }
+    let!(:d) { tree.new(root, "d") }
+    let!(:e) { tree.new(d, "e") }
+
+    describe "insert" do
+      it "adds the nodes to children" do
+        parent = tree.new(nil, "parent")
+        parent.insert(0, child = tree.new(nil, "child"))
+        expect(parent.children).to eq [child]
+      end
+
+      it "links up the nodes" do
+        parent = tree.new(nil, "parent")
+        parent.insert(0, child = tree.new(nil, "child"))
+        expect(child.parent).to eq parent
+      end
+
+      context "with an integer argument" do
+        it "inserts the children before the given index" do
+          root.insert(2, suffix = tree.new(nil, "suffix"))
+          root.insert(1, infix = tree.new(nil, "infix"))
+          root.insert(0, prefix = tree.new(nil, "prefix"))
+          expect(root.children).to eq [prefix, a, infix, d, suffix]
+
+        end
+      end
+
+      context "with a node argument" do
+        it "inserts the children before the given node" do
+          root.insert(d, infix = tree.new(nil, "infix"))
+          expect(root.children).to eq [a, infix, d]
+        end
+      end
+    end
+
+    describe "append" do
+      it "adds the nodes to children" do
+        parent = tree.new(nil, "parent")
+        parent.append(-1, child = tree.new(nil, "child"))
+        expect(parent.children).to eq [child]
+      end
+
+      it "links up the nodes" do
+        parent = tree.new(nil, "parent")
+        parent.append(0, child = tree.new(nil, "child"))
+        expect(child.parent).to eq parent
+      end
+
+      context "with an integer argument" do
+        it "appends the children before the given index" do
+          root.append(1, suffix = tree.new(nil, "suffix"))
+          root.append(0, infix = tree.new(nil, "infix"))
+          root.append(-1, prefix = tree.new(nil, "prefix"))
+          expect(root.children).to eq [prefix, a, infix, d, suffix]
+
+        end
+      end
+
+      context "with a node argument" do
+        it "appends the children before the given node" do
+          root.append(a, infix = tree.new(nil, "infix"))
+          expect(root.children).to eq [a, infix, d]
+        end
+      end
+    end
+  end
 end
 
 #     Tree::ParentImplementation,

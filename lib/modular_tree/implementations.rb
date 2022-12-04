@@ -167,6 +167,19 @@ module Tree
 
     def each_child(&block) = @children.map(&block)
     def attach(child) = @children << child
+
+    # Can be used with any array implementation
+    def insert(where, child) = insert_append(:insert, where, child)
+    def append(where, child) = insert_append(:append, where, child)
+
+  protected
+    def insert_append(which, where, child)
+      if !where.is_a?(Integer)
+        where = @children.index(where) or raise ArgumentError, "Can't find object"
+      end
+      where += 1 if which == :append
+      @children.insert(where, child)
+    end
   end
 
   module InternalChildrenHashImplementation
@@ -198,5 +211,30 @@ module Tree
       child.send(:parent=, self)
     end
   end
+
+  module InternalParentChildArrayImplementation
+    include InternalParentChildImplementation
+
+    def insert(where, child)
+      super
+      child.send(:parent=, self)
+    end
+
+    def append(where, child)
+      super
+      child.send(:parent=, self)
+    end
+  end
 end
+
+
+
+
+
+
+
+
+
+
+
 

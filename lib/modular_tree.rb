@@ -39,7 +39,7 @@ module Tree
   class ArrayTree < AbstractTree # Aka. SetTree aka. Tree
     include InternalParentImplementation
     include InternalChildrenArrayImplementation
-    include InternalParentChildImplementation
+    include InternalParentChildArrayImplementation
     include UpTreeAlgorithms
     include DownTreeAlgorithms
     include DownTreeFilteredAlgorithms
