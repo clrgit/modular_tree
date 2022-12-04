@@ -89,8 +89,20 @@ module Tree
     # matching-node] tuples. Top-level nodes have previous-matching-node set to
     # nil
     #
+    # FIXME
+    #
+    # root
+    #   match-first-a
+    #     match-first-b
+    #       match-second
+    #
+    # Should return
+    #   [match-first-b, match-second] and not [match-first-a, match-second]
+    #
+    # ^or maybe this is how #pairs should work?
+    #
     def edges(*filter, this: true, &block)
-      if block_given
+      if block_given?
         each(*filter, this: this) { |node, _, parent| yield parent, node }
       else
         Pairs.new { |enum| each(*filter, this: this) { |node, _, parent| enum << [parent, node] } }
