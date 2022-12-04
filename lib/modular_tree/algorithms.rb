@@ -63,16 +63,21 @@ module Tree
     # Implementation of Enumerable#each extended with filters. The block is
     # called with value, key, and parent as arguments (it may choose to
     # ignore key and/or parent). Returns an enumerator of values without a block
-    def each(*filter, this: true, &block) = common_each(*filter, :value, :each_preorder, this, &block)
+    def each(*filter, this: true, &block) = common_each(*filter, :value, :do_each_preorder, this, &block)
 
     # Implementation of Enumerable#select extended with a single filter. As
     # #each, the block is called with value, key, and parent arguments
     def select(filter = nil, this: true, &block)
+      if block_given?
+        each(block, true, this: this).to_a
+      else
+        each(filter || true, true, this: this)
+      end
     end
 
     # Like #each but the block is called with node, key, and parent instead of
     # value, key, and parent
-    def nodes(*filter, this: true, &block) = common_each(*filter, :node, :each_preorder, this, &block)
+    def nodes(*filter, this: true, &block) = common_each(*filter, :node, :do_each_preorder, this, &block)
 
     # Pre-order enumerator of selected nodes. Same as #each without a block
     def preorder(*filter, this: true) = each(*filter, this: this)

@@ -42,6 +42,7 @@ module Tree
     include InternalParentChildImplementation
     include UpTreeAlgorithms
     include DownTreeAlgorithms
+    include DownTreeFilteredAlgorithms
 
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
