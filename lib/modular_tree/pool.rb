@@ -1,4 +1,5 @@
 module Tree
+  # For internal trees with a global namespace for nodes
   module Pool
     include PathAlgorithms
 

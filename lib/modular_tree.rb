@@ -1,5 +1,7 @@
 require 'abstract_method_error'
 
+require "indented_io"
+
 require 'constrain'
 include Constrain
 
@@ -16,9 +18,8 @@ require_relative "modular_tree/properties"
 require_relative "modular_tree/implementations"
 require_relative "modular_tree/algorithms"
 
+# Should be after the above group
 require_relative "modular_tree/pool"
-
-require "indented_io"
 
 module Tree
   DEFAULT_SEPARATOR = "."
@@ -51,6 +52,7 @@ module Tree
     def self.filter(*args) = FilteredDownTreeAlgorithms.filter(*args)
   end
 
+  # TODO: Hide
   class NestedArrayTree < AbstractTree
     include ExternalChildrenArrayImplementation
     include DownTreeAlgorithms
@@ -63,11 +65,25 @@ module Tree
     def self.filter(*args) = DownTreeAlgorithms.filter(*args)
   end
 
+  # Module level algorithms on nested array trees
+  #
   def self.aggregate(arg, *args, &block)
     case arg
       when Array; NestedArrayTree.new(arg).aggregate(*args, &block)
     else
       raise ArgumentError
+    end
+  end
+
+  def self.aggregate(arg, *args, &block) = class_of(arg).new(arg).aggregate(*args, &block)
+
+  # TODO: Hide
+  def self.class_of(arg)
+    constrain arg, Array
+    if arg.size == 2 && arg.last.is_a?(Array)
+      NestedArrayTree
+    else
+      raise "Oops"
     end
   end
 

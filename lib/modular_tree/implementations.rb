@@ -28,11 +28,13 @@ module Tree
   module InternalImplementation
     include Implementation
     def node = self
+    def this = self
+    def value = self
   end
 
   module ParentImplementation
     include ParentProperty
-    include BranchProperty
+    include StemProperty
     include Implementation
   end
 
@@ -67,17 +69,20 @@ module Tree
 
     def node = array
     def this = array.first
+    def value = array.first
 
     attr_accessor :array
 
     def children = @array.last.map(&:first)
     def branches = Enumerator.new { |enum| each_branch { |branch| enum << branch } }
 
-    def each_child(&block) = @array.last.each { |*node| yield(*node) }
+    # FIXME: each_child/branch/etc. are actually map methods
+    def each_child(&block) = @array.last.map { |*node| yield(*node) }
 #   def each_child(&block) = array.second.each { |node| yield(*node, self) } # Actually possible
 #   def each_child(&block) = array.last.each(&:first)
 
     def each_branch(&block)
+      block_given? or raise ArgumentError
 #     impl = self.class.new(nil)
       @array.last.map { |node| yield self.class.new(node) }
     end
@@ -115,7 +120,7 @@ module Tree
 #   alias_method :each_branch, :each_child
 
     def branches = children
-    def each_branch = each_child
+    def each_branch(&block) = each_child(&block)
 
     def attach(child) = abstract_method
   end
@@ -160,8 +165,7 @@ module Tree
       super
     end
 
-    def each_child(&block) = @children.each(&block)
-
+    def each_child(&block) = @children.map(&block)
     def attach(child) = @children << child
   end
 

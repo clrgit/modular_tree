@@ -41,7 +41,7 @@ describe "Tree" do
       expect(c.ancestors).to eq [a, root]
     end
     it "has down-methods" do
-      s = root.aggregate { |node, values| 
+      s = root.aggregate { |node, values|
         "#{node}#{values.empty? ? "" : "(#{values.join(',')})"}"
       }
       expect(s).to eq "root(a(b,c),d(e))"
@@ -51,7 +51,7 @@ describe "Tree" do
   describe "NestedArrayTree" do
     let(:klass) { # This also demonstrates mounting of a class on a nested array
       Class.new(Tree::NestedArrayTree) do
-        def to_s = array.first
+#       def to_s = array.first
       end
     }
 
@@ -87,11 +87,39 @@ describe "Tree" do
 
     it "defines Tree.aggregate" do
       s = Tree.aggregate(r) { |node, values|
-        "#{node.this}#{values.empty? ? "" : "(#{values.join(',')})"}"
+        "#{node}#{values.empty? ? "" : "(#{values.join(',')})"}"
       }
       expect(s).to eq "root(a(b,c),d(e))"
     end
+
+#   it "is nice" do
+#     json = JSON.parse(...)
+#     nodes_of_interest = Tree.select(json) { ... }
+#   end
   end
+
+  describe "Hash Trees" do
+    let(:h) { {
+      "root" => {
+        "a" => {
+           "b" => {},
+           "c" => {}
+        },
+        "d" => {
+          "e" => {}
+        }
+      }
+    } }
+
+
+
+    it "does something" #do
+#     Tree.visit(h, lambda { |n| n.size > 0 }) { |n, k| puts "interior node: #{k} => #{n.inspect}" }
+#     Tree.select(h) { |n| n.size > 0 }.each { |n, k| puts "interior node: #{k} => #{n.inspect}" }
+#     Tree.visit(h, lambda { |n| n.empty? }) { |n, k| puts "leaf node: #{k}" }
+#   end
+  end
+
 end
 
 __END__

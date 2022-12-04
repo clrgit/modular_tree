@@ -8,5 +8,7 @@ module Tree
 
     # Turn into a nested array tree
     def fold = abstract_method
+
+    def to_h = abstract_method
   end
 end

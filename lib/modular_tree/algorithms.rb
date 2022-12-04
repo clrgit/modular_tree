@@ -7,7 +7,7 @@ module Tree
   #
   module UpTreeAlgorithms
     include NodeProperty
-    include BranchProperty
+    include BranchesProperty
 
     # Bottom-up
     def ancestors
@@ -28,6 +28,13 @@ module Tree
     def depth = @depth ||= ancestors.size
   end
 
+  # IDEA
+  #
+  #   tree.forrest -> Forrest
+  #   tree.nodes -> Use node instead of value
+  #   tree.forrest.nodes -> both
+
+
   # A down tree can only be traversed top-down as it has no reference to its
   # parent. It is also a kind of a graph node
   #
@@ -42,126 +49,46 @@ module Tree
     include NodeProperty
     include BranchesProperty
 
-    # True if the node doesn't contain any branches
-    def empty? = branches.empty?
+    # True if the node doesn't contain any branches (#empty? for trees)
+    def bare? = raise NotImplemented
 
     # The number of nodes in the tree. Note that this can be an expensive
-    # operation since every node that to be visited
+    # operation because every node has to be visited
     def size = 1 + descendants.to_a.size
 
     # Enumerator of descendant nodes matching filter. Same as #preorder with
-    # :this set to false
-    def descendants(*filter) = preorder(filter, this: false)
+    # :this set to false. TODO: Maybe introduce forrests: tree.forrest.each
+    def descendants(*filter) = each(filter, this: false)
 
-    # Implementation of Enumerable#each
-    def each(&block) = block_given? ? visit(&block) : preorder
+    # Implementation of Enumerable#each extended with filters. The block is
+    # called with value, key, and parent as arguments (it may choose to
+    # ignore key and/or parent). Returns an enumerator of values without a block
+    def each(*filter, this: true, &block) = common_each(*filter, :value, :each_preorder, this, &block)
 
-    # Implementation of Enumerable#map
-    def map(&block) = preorder.map(&block)
+    # Like #each but the block is called with node, key, and parent instead of
+    # value, key, and parent
+    def nodes(*filter, this: true, &block) = common_each(*filter, :node, :each_preorder, this, &block)
 
-    # Nomenclature
-    #   parent, branches, this # Does not necessarily contain tree-information
-    #   branch, branches, node # Contains tree information
-    #
-    #   #this # Returns node without tree-information
-    #   #node # Returns node with tree-information
-    #
-    #   #self -> acts as if it is a container of branches
-    #   #each(&block) -> iterate all descendant branches
-    #   #each_child(&block) -> iterate immediate branches
-    #
-    #   #nodes -> a container of nodes
-    #   #each_node(&block) -> iterate all descendant nodes
-    #   #each_branch(&block) -> iterate immediate branches
-
-    # Like #each but with filters
-    def filter(*filter, this: true, &block) 
-      filter = self.class.filter(*filter)
-      if block_given?
-        do_filter(nil, filter, this, &block)
-      else
-        Enumerator.new { |enum| do_filter(enum, filter, this) }
-      end
-    end
-
-    # Enumerator of nodes in the tree matching the filter. Aka. 'filter'
-    alias_method :nodes, :filter
-
-    # Pre-order enumerator of selected nodes
-    def preorder(*filter, this: true)
-      filter = self.class.filter(*filter)
-      Enumerator.new { |enum| do_preorder(enum, filter, this) }
-    end
+    # Pre-order enumerator of selected nodes. Same as #each without a block
+    def preorder(*filter, this: true) = each(*filter, this: this)
 
     # Post-order enumerator of selected nodes
-    def postorder(*filter, this: true) = raise NotImplementedError
-
-    # Implementation of Enumerable#inject method
-    def inject(default = nil, &block) = preorder.inject(default, &block)
-
-#   def traverse(&block)
-#     before()
-#     yield(&block)
-#     after()
-#   end
+    def postorder(*filter, this: true) = common_each(*filter, :value, :each_postorder, this)
 
     # Enumerator of edges in the tree. Edges are [previous-matching-node,
     # matching-node] tuples. Top-level nodes have previous-matching-node set to
     # nil
     #
     def edges(*filter, this: true, &block)
-      filter = self.class.filter(*filter)
-      if block_given?
-        do_edges(nil, filter, this, &block)
-        
-#       case block.arity
-#         when 0; do_edges_0(nil, filter, this, &block)
-#         when 1; do_edges_1(nil, filter, this, &block)
-#         when 2; do_edges_2(nil, filter, this, &block)
-#         when 3; do_edges_3(nil, filter, this, &block)
-#       else
-#         raise ArgumentError
-#       end
-#
-#       do_edges(nil, filter, this) { |parent, key, node|
-#         case block.arity
-#           when 0; yield
-#           when 1; yield(node)
-#           when 2; yield(key, node)
-#           when 3; yield(parent, key, node)
-#         else
-#           raise ArgumentError
-#         end
-#       }
+      if block_given
+        each(*filter, this: this) { |node, _, parent| yield parent, node }
       else
-        Pairs.new { |enum| do_edges(enum, filter, this) }
+        Pairs.new { |enum| each(*filter, this: this) { |node, _, parent| enum << [parent, node] } }
       end
     end
 
-    # Return edges as from-node/to-node pairs where the from-node is selected
-    # by the filter and the to-node is a descendant of the first node that
-    # satisfies the given condition. The second node doesn't have to be matched
-    # by the filter
-    #
-    # FIXME: Edges without a filter should do the expected
-    def pairs(*filter, cond_expr, this: true, &block)
-      filter = self.class.filter(*filter)
-      cond = Filter.mk_lambda(cond_expr)
-      if block_given?
-        do_pairs(nil, filter, this, cond, &block)
-      else
-        Pairs.new { |enum| do_pairs(enum, filter, this, cond) }
-      end
-    end
-
-    # Execute block on selected nodes. Effectively the same as
-    # 'preorder(...).each(&block)' but faster as it doesn't create an
-    # Enumerator
-    def visit(*filter, this: true, &block)
-      filter = self.class.filter(*filter)
-      block_given? or raise ArgumentError, "Block is required"
-      do_visit(filter, this, &block)
-    end
+#   def pairs(filter, filter, &block)
+#   end
 
     # Traverse the tree top-down while accumulating information in an
     # accumulator object. The block takes a [accumulator, node] tuple and is
@@ -169,6 +96,8 @@ module Tree
     # the block is then used as the accumulator for the branch nodes. Note that
     # it returns the original accumulator and not the final result - this makes
     # it different from #inject
+    #
+    # #accumulate is a kind of "preorder" algorithm
     def accumulate(*filter, accumulator, this: true, &block)
       filter = self.class.filter(*filter)
       block_given? or raise ArgumentError, "Block is required"
@@ -178,13 +107,23 @@ module Tree
 
     # Traverse the tree bottom-up while aggregating information. The block is
     # called with a [current-node, branch-node-results] tuple
+    #
+    # #aggregate is a kind of "postorder" algorithm
+    #
+    # TODO: Remove +this+ flag - it not used and doesn't make sense
     def aggregate(*filter, this: true, &block)
       filter = self.class.filter(*filter)
       do_aggregate(filter, this, &block)
     end
 
-    # Find first node that matches the filter and that returns truthy from the block
-    def find(*filter, &block) = descendants(*filter).first(&block)
+    # Stops further recursion if the block returns truthy
+    def propagate(*filter, this: true, &block)
+      
+    end
+
+    # tree.each(DocumentNode).select(BriefNode).each { |doc, brief| ... }
+    # tree.edges(DocumentNode, BriefNode).group.all? { |doc, briefs| briefs.size <= 1 }
+    # tree.map(DocumentNode) { |doc| doc.select(BriefNode).size <= 1 or raise }
 
     # Create a Tree::Filter object. Can also take an existing filter as
     # argument in which case the given filter will just be passed through
@@ -198,74 +137,76 @@ module Tree
     end
 
   protected
-    def do_preorder(enum, filter, this)
-      select, traverse = filter.match(self)
-      enum << self if this && select
-      each_branch { |branch| branch.do_preorder(enum, filter, true) } if traverse || !this
-    end
-
-    # +enum+ is unused (and unchecked) if a block is given
-    def do_edges(enum, filter, this, last_match = nil, &block)
-      select, traverse = filter.match(node)
-      if this && select
-        if block_given?
-          yield(last_match, node)
-        else
-          enum << [last_match, node]
-        end
-        last_match = node
+    def common_each(*filter, value_method, each_method, this, &block)
+      filter = self.class.filter(*filter)
+      if block_given?
+        self.send(each_method, nil, filter, value_method, nil, nil, this, &block)
+      else
+        Enumerator.new { |enum| self.send(each_method, enum, filter, value_method, nil, nil, this) }
       end
-      each_branch { |branch| branch.do_edges(enum, filter, true, last_match, &block) } if traverse || !this
     end
 
-    def do_pairs(enum, filter, this, cond, last_selected = nil, &block)
+    # TODO: Split into automatically generated variants
+    def do_each_preorder(enum, filter, value_method, key, parent, this, &block)
       select, traverse = filter.match(self)
-      last_selected = self if this && select
-      branches.each { |branch| 
-        if last_selected && cond.call(branch)
-          if block_given?
-            yield(last_selected, branch)
-          else
-            enum << [last_selected, branch]
-          end
-        else
-          branch.do_pairs(enum, filter, true, cond, last_selected, &block) 
-        end
-      } if traverse || !this
-    end
-
-    # filter.children(self)
-
-    def do_filter(enum, filter, this, &block)
-      select, traverse = filter.match(self)
-      if this && select
+      if select && this
+        value = self.send(value_method)
         if block_given?
-          yield self
+          yield(value, key, parent)
         else
-          enum << self
+          enum << value
+        end
+        parent = value
+      end
+      if !this || traverse
+        each_branch { |branch, key| 
+          branch.do_each_preorder(enum, filter, value_method, key, parent, true, &block) 
+        }
+      end
+    end
+
+    def do_each_postorder(enum, filter, value_method, key, parent, this, &block)
+      select, traverse = filter.match(self)
+      if !this || traverse
+        each_branch { |branch, key| 
+          branch.do_each_postorder(enum, filter, value_method, key, p, true, &block) 
+        }
+      end
+      if select && this
+        value = self.send(value_method)
+        if block_given?
+          yield(value, key, parent)
+        else
+          enum << value
         end
       end
-      branches.each { |branch| branch.do_filter(enum, filter, true, &block) } if traverse || !this
     end
 
-    def do_visit(filter, this, &block)
+    def do_propagate(filter, this, key, parent, &block)
       select, traverse = filter.match(self)
-      yield(self) if this && select
-      branches.each { |branch| branch.do_visit(filter, true, &block) } if traverse || !this
+      if select && this
+        return if yield(self, key, parent)
+      end
+      if !this || traverse
+        each_branch { |branch, key| branch.do_propagate(filter, key, self.value) }
+      end
     end
 
     def do_accumulate(filter, this, acc, &block)
       select, traverse = filter.match(self)
-      acc = yield(acc, self) if this && select
-      branches.each { |branch| branch.do_accumulate(filter, true, acc, &block) } if traverse || !this
+      acc = yield(acc, self.value) if this && select
+      each_branch.each { |branch| branch.do_accumulate(filter, true, acc, &block) } if traverse || !this
     end
 
     def do_aggregate(filter, this, &block) # TODO: use select-status
+      block_given? or raise ArgumentError
       select, traverse = filter.match(self)
-      values = traverse ? branches.map { |branch| branch.do_aggregate(filter, true, &block) } : []
-#     values = traverse ? children.map { |child| child.do_aggregate(filter, true, &block) } : []
-      yield(self, values)
+      values = traverse ? each_branch { |branch| 
+        r = branch.do_aggregate(filter, true, &block) 
+      }.to_a : []
+      yield(self.value, values)
     end
+
   end
 
   module DownTreeAlgorithms

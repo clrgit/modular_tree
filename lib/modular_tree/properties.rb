@@ -11,10 +11,13 @@ module Tree
 
   module NodeProperty
     def node = abstract_method
+
+    # FIXME: What is this. Also describe all properties in this file
+    def value = abstract_method
   end
 
-  module BranchProperty # Aka. 'parent'
-    def branch = abstract_method
+  module StemProperty # Aka. 'parent'
+    def stem = abstract_method
   end
 
   module BranchesProperty
