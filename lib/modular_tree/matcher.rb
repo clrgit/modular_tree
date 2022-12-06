@@ -1,6 +1,10 @@
 module Tree
   class AbstractMatcher
     def match(node) = abstract_method
+
+    def |(other) = MatchExpression::OrExpr.new(self, other)
+    def &(other) = MatchExpression::AndExpr.new(self, other)
+    def !() = MatchExpression::NegationExpr.new(self)
   end
   
   class Matcher < AbstractMatcher
@@ -19,19 +23,19 @@ module Tree
         when true, false
           @expr
       else
-        raise ArgumentError
+        raise ArgumentError, @expr.inspect
       end
     end
 
     def initialize(expr = nil, &block)
-      expr.nil? == block_given? or raise ArgumentError
       constrain expr, Proc, Symbol, Class, [Class], true, false, nil
-      @expr = expr || block
+      expr.nil? == block_given? or raise ArgumentError
+      @expr = (expr.nil? ? block : expr)
     end
 
-    def or(other) = MatchExpression::OrExpr.new(self, other)
-    def and(other) = MatchExpression::AndExpr.new(self, other)
-    def not() = MatchExpression::NegationExpr.new(self)
+    def self.new(expr = nil, *args, &block)
+      expr.is_a?(AbstractMatcher) ? expr : super
+    end
   end
 
   module MatchExpression

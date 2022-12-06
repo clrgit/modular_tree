@@ -13,7 +13,7 @@ module Tree
     def node = abstract_method
 
     # FIXME: What is this. Also describe all properties in this file
-    def value = abstract_method
+    def node_value = abstract_method
   end
 
   module StemProperty # Aka. 'parent'

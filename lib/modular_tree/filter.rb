@@ -11,9 +11,10 @@ module Tree
     # traverse expression decides if the child nodes should be traversed
     # recursively
     #
-    # The expressions can be a Proc, Symbol, Class, or an array of classes. In
-    # addition, +select+ can be true, and +traverse+ can be true, false, or
-    # nil. These values have special meanings:
+    # The expressions can be a Matcher object or one of Matcher's initializers:
+    # Proc, Symbol, Class, or an array of classes. In addition, +select+ can be
+    # true, and +traverse+ can be true, false, or nil. These values have
+    # special meanings:
     #
     #   when +select+ is
     #     true    Select always. This is the default
@@ -45,11 +46,11 @@ module Tree
       if select_expr.nil? && block_given?
         @matcher = block
       else
-        select_expr ||= true
-        traverse_expr ||= (block_given? ? block : true)
+        select_expr = true if select_expr.nil?
         select = Matcher.new(select_expr)
-        traverse = Matcher.new(traverse_expr)
-        @matcher = lambda { |node| [select.match(node), traverse.match(node)] }
+        traverse_expr = (block_given? ? block : true) if traverse_expr.nil?
+        traverse = traverse_expr ? Matcher.new(traverse_expr) : !select
+        @matcher = lambda { |node| [select.match?(node), traverse.match?(node)] }
       end
     end
 

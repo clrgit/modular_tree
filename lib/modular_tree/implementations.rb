@@ -29,7 +29,7 @@ module Tree
     include Implementation
     def node = self
     def this = self
-    def value = self
+    def node_value = self
   end
 
   module ParentImplementation
@@ -69,7 +69,7 @@ module Tree
 
     def node = array
     def this = array.first
-    def value = array.first # FIXME What is this? It is a problem several places
+    def node_value = array.first # FIXME What is this? It is a problem several places
 
     attr_accessor :array
 

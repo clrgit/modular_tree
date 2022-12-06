@@ -61,9 +61,10 @@ module Tree
     def descendants(*filter) = each(filter, this: false)
 
     # Implementation of Enumerable#each extended with filters. The block is
-    # called with value, key, and parent as arguments (it may choose to
-    # ignore key and/or parent). Returns an enumerator of values without a block
-    def each(*filter, this: true, &block) = common_each(*filter, :value, :do_each_preorder, this, &block)
+    # called with value, key, and parent as arguments but it may choose to
+    # ignore the key and/or parent argument. Returns an enumerator of values
+    # without a block
+    def each(*filter, this: true, &block) = common_each(*filter, :node_value, :do_each_preorder, this, &block)
 
     # Implementation of Enumerable#select extended with a single filter. As
     # #each, the block is called with value, key, and parent arguments
@@ -83,24 +84,13 @@ module Tree
     def preorder(*filter, this: true) = each(*filter, this: this)
 
     # Post-order enumerator of selected nodes
-    def postorder(*filter, this: true) = common_each(*filter, :value, :each_postorder, this)
+    def postorder(*filter, this: true) = common_each(*filter, :node_value, :each_postorder, this)
 
     # Enumerator of edges in the tree. Edges are [previous-matching-node,
     # matching-node] tuples. Top-level nodes have previous-matching-node set to
     # nil
     #
-    # FIXME
-    #
-    # root
-    #   match-first-a
-    #     match-first-b
-    #       match-second
-    #
-    # Should return
-    #   [match-first-b, match-second] and not [match-first-a, match-second]
-    #
-    # ^or maybe this is how #pairs should work?
-    #
+    # FIXME: Not working right now. Not sure how #edges relates to #pairs
     def edges(*filter, this: true, &block)
       if block_given?
         each(*filter, this: this) { |node, _, parent| yield parent, node }
@@ -109,42 +99,34 @@ module Tree
       end
     end
 
-    # Visit all nodes matching +filter+, stops further recursion if the block
-    # returns false or nil
-    def traverse(filter, this: true, &block)
-      each(filter, false) {
-        
+    # Find nodes matching +filter+ and call +traverse_block+ with a node and a
+    # block argument. +traverse_block+ can recurse into children by calling the
+    # supplied inner block
+    #
+    # An example of how to create a nested array implementation:
+    #
+    #   root.traverse(true) { |node, inner| [node, inner.call(node)] }
+    #
+    def traverse(*filter, this: true, &traverse_block)
+      filter = self.class.filter(*filter)
+      inner_block_proxy = [nil] # Hack because you can't refer to a lambda within its declaration
+      inner_block = inner_block_proxy[0] = lambda { |node|
+        node.nodes(filter, this: false).map { |n| traverse_block.call(n, inner_block_proxy.first) }
       }
-      
+      nodes(filter, this: this).map { |node| traverse_block.call(node, inner_block) }
     end
-
-
-
-
-    def do_pair
-
-
-      
-    end
-
-    # 
-    def pairs(first, second, this: true)
-      
-      
-
-      stack = []
-      visit(first) { |node|
-        stack.push node
-        node.visit
+    
+    # Return array of [previous-matching-node, matching-node] tuples
+    def pairs(first_matcher_expr, second_matcher_expr, this: true)
+      first_matcher = Matcher.new(first_matcher_expr)
+      second_matcher = Matcher.new(second_matcher_expr)
+      or_matcher = first_matcher | second_matcher # avoids re-computing this value over and over
+      result = []
+      nodes(first_matcher, false, this: this) { |node|
+        node.do_pairs(result, first_matcher, or_matcher)
       }
-      if block_given?
-        
-      else
-      end
+      result
     end
-
-#   def pairs(filter, filter, &block)
-#   end
 
     # Traverse the tree top-down while accumulating information in an
     # accumulator object. The block takes a [accumulator, node] tuple and is
@@ -172,10 +154,7 @@ module Tree
       do_aggregate(filter, this, &block)
     end
 
-    # Stops further recursion if the block returns truthy
-    def propagate(*filter, this: true, &block)
-      
-    end
+#   def propagate(*filter, this: true, &block) raise NotImplemented end
 
     # tree.each(DocumentNode).select(BriefNode).each { |doc, brief| ... }
     # tree.edges(DocumentNode, BriefNode).group.all? { |doc, briefs| briefs.size <= 1 }
@@ -188,7 +167,7 @@ module Tree
         args.size == 1 or raise ArgumentError
         args.first
       else
-        Filter.new(*args) 
+        Filter.new(*args)
       end
     end
 
@@ -200,6 +179,16 @@ module Tree
       else
         Enumerator.new { |enum| self.send(each_method, enum, filter, value_method, nil, nil, this) }
       end
+    end
+
+    def do_pairs(acc, first_matcher, or_matcher) # self is matched by first_matcher
+      nodes(or_matcher, false, this: false) { |node|
+        if first_matcher.match?(node)
+          node.do_pairs(acc, first_matcher, or_matcher)
+        else
+          acc << [self, node]
+        end
+      }
     end
 
     # TODO: Split into automatically generated variants
@@ -238,25 +227,15 @@ module Tree
       end
     end
 
-    def do_traverse(filter, this, key, parent, &block)
-      select, traverse = filter.match(self)
-      if select && this
-        return if yield(self, key, parent)
-      end
-      if !this || traverse
-        each_branch { |branch, key| branch.do_propagate(filter, key, self.value) }
-      end
-    end
-
-    def do_propagate(filter, this, key, parent, &block)
-      select, traverse = filter.match(self)
-      if select && this
-        return if yield(self, key, parent)
-      end
-      if !this || traverse
-        each_branch { |branch, key| branch.do_propagate(filter, key, self.value) }
-      end
-    end
+#   def do_propagate(filter, this, key, parent, &block)
+#     select, traverse = filter.match(self)
+#     if select && this
+#       return if yield(self, key, parent)
+#     end
+#     if !this || traverse
+#       each_branch { |branch, key| branch.do_propagate(filter, key, self.value) }
+#     end
+#   end
 
     def do_accumulate(filter, this, acc, &block)
       select, traverse = filter.match(self)
@@ -270,9 +249,8 @@ module Tree
       values = traverse ? each_branch { |branch| 
         r = branch.do_aggregate(filter, true, &block) 
       }.to_a : []
-      yield(self.value, values)
+      yield(self.node_value, values)
     end
-
   end
 
   module DownTreeAlgorithms

@@ -36,25 +36,25 @@ describe "Matcher" do
       expect(match([subklass, subsubklass])).to eq [false, true, true]
     end
 
-    describe "#or" do
+    describe "#|" do
       it "Combines two matchers by the || operator" do
         left = Tree::Matcher.new { |node| node.value == 2 }
         right = Tree::Matcher.new { |node| node.value == 3 }
-        matcher = left.or(right)
+        matcher = left | right
         expect(match(matcher)).to eq [false, true, true]
       end
     end
-    describe "#and" do
+    describe "#&" do
       it "Combines two matchers by the && operator" do
         left = Tree::Matcher.new { |node| [1, 2].include? node.value }
         right = Tree::Matcher.new { |node| [2, 3].include? node.value }
-        matcher = left.and(right)
+        matcher = left & right
         expect(match(matcher)).to eq [false, true, false]
       end
     end
-    describe "#not" do
+    describe "#!" do
       it "Negates the result of the match" do
-        matcher = Tree::Matcher.new(subklass).not
+        matcher = !Tree::Matcher.new(subklass)
         expect(match(matcher)).to eq [true, false, false]
       end
     end
