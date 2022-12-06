@@ -115,6 +115,16 @@ describe "algorithms" do
         expect(traversed).to eq array_representation
       end
 
+      it "can define accumulate"
+#     it "can define accumulate" do
+#       acc = []
+#       matcher = Tree::Matcher.new(true)
+#       result = root.traverse(matcher, this: true) { |node, inner|
+#         node.value + inner.call(node).sum
+#       }
+#       expect(result).to eq 15
+#     end
+
       it "can define postorder" do
         postorder = []
         matcher = Tree::Matcher.new(true)
