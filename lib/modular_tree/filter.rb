@@ -1,4 +1,29 @@
 module Tree
+
+  class Matcher
+    def match(node)
+      case expr
+        when Proc
+          expr.call(node)
+        when Symbol
+          node.respond_to?(expr) && node.send(expr)
+        when Class
+          node.is_a? expr
+        when Array
+          expr.any? { |klass| node.is_a? klass }
+        when true, false
+          expr
+      else
+        raise ArgumentError
+      end
+    end
+
+    def initialize(expr)
+      constrain expr, Proc, Symbol, Class, [Class], true, false
+      @expr = expr
+    end
+  end
+
   class Filter
     # Create a node filter. The filter is initialized by a select expression
     # and a traverse expression.  The select expression decides if the node
@@ -61,6 +86,12 @@ module Tree
 
     # Match +node+ against the filter and return a [select, traverse] tuple of booleans
     def match(node) = @matcher.call(node)
+
+    # Combine two filters using 'or'
+#   def ||(other)
+#     constrain other, Filter
+#     Filter.new
+#   end
 
     # Create a proc if arg is a Symbol or an Array of classes. Pass through
     # Proc objects, true, false, and nil

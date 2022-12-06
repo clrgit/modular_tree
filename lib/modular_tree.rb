@@ -10,6 +10,7 @@ include ForwardTo
 
 require_relative "modular_tree/version"
 require_relative "modular_tree/separator"
+require_relative "modular_tree/matcher"
 require_relative "modular_tree/filter"
 require_relative "modular_tree/pairs"
 

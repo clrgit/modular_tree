@@ -109,6 +109,40 @@ module Tree
       end
     end
 
+    # Visit all nodes matching +filter+, stops further recursion if the block
+    # returns false or nil
+    def traverse(filter, this: true, &block)
+      each(filter, false) {
+        
+      }
+      
+    end
+
+
+
+
+    def do_pair
+
+
+      
+    end
+
+    # 
+    def pairs(first, second, this: true)
+      
+      
+
+      stack = []
+      visit(first) { |node|
+        stack.push node
+        node.visit
+      }
+      if block_given?
+        
+      else
+      end
+    end
+
 #   def pairs(filter, filter, &block)
 #   end
 
@@ -201,6 +235,16 @@ module Tree
         else
           enum << value
         end
+      end
+    end
+
+    def do_traverse(filter, this, key, parent, &block)
+      select, traverse = filter.match(self)
+      if select && this
+        return if yield(self, key, parent)
+      end
+      if !this || traverse
+        each_branch { |branch, key| branch.do_propagate(filter, key, self.value) }
       end
     end
 
