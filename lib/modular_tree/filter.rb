@@ -1,30 +1,10 @@
 module Tree
-
-  class Matcher
-    def match(node)
-      case expr
-        when Proc
-          expr.call(node)
-        when Symbol
-          node.respond_to?(expr) && node.send(expr)
-        when Class
-          node.is_a? expr
-        when Array
-          expr.any? { |klass| node.is_a? klass }
-        when true, false
-          expr
-      else
-        raise ArgumentError
-      end
-    end
-
-    def initialize(expr)
-      constrain expr, Proc, Symbol, Class, [Class], true, false
-      @expr = expr
-    end
-  end
-
   class Filter
+    # :call-seq:
+    #   Filter.new(select_expr, traverse_expr)
+    #   Filter.new(select_expr, &block)
+    #   Filter.new(&block)
+    #
     # Create a node filter. The filter is initialized by a select expression
     # and a traverse expression.  The select expression decides if the node
     # should be given to the block (or submitted to an enumerator) and the
@@ -37,80 +17,44 @@ module Tree
     #
     #   when +select+ is
     #     true    Select always. This is the default
+    #     false   This is an allowed value but it doesn't select any node
     #
     #   when +traverse+ is
     #     true    Traverse always. This is the default
     #     false   Traverse only if select didn't match
-    #     nil     Expects +select+ to return a two-tuple of booleans. Can't be
-    #             used when +select+ is true. TODO: Explain
+    #     nil     Expects +select+ to be a Proc object that returns a [select,
+    #             traverse] tuple of booleans
     #
     # If the expression is a Proc object, it will be called with the current
     # node as argument. If the return value is true, the node is
     # selected/traversed and skipped otherwise. If the expression is a method
     # name (Symbol), the method will be called on each node with no arguments.
     # It is not an error if the method doesn't exists on the a given node but
-    # the node is not selected/traversed
+    # the node is not selected/traversed. If the expression is a class or an
+    # array of classes, a given node matches if it is an instance of one of the
+    # classes or any subclass
     #
-    # If the expression is a class or an array of classes, a given node matches
-    # if it is an instance of one of the classes or any subclass
+    # If a block is given, it is supposed to return a [select, traverse] tuple
+    # of booleans
     #
     # Filters should not have side-effects because they can be used in
     # enumerators that doesn't execute the filter unless the enumerator is
     # evaluated
     #
-    # TODO: block argument
-    #
-    def initialize(select_expr = true, traverse_expr = true, &block)
-      constrain select_expr, Proc, Symbol, Class, [Class], true
-      constrain traverse_expr, Proc, Symbol, Class, [Class], true, false, nil
-      select = mk_lambda(select_expr)
-      traverse = mk_lambda(traverse_expr)
-      @matcher = 
-          case select
-            when Proc
-              case traverse
-                when Proc; lambda { |node| [select.call(node), traverse.call(node)] }
-                when true; lambda { |node| [select.call(node), true] }
-                when false; lambda { |node| r = select.call(node); [r, !r] }
-                when nil; lambda { |node| select.call(node) }
-              end
-            when true
-              case traverse
-                when Proc; lambda { |node| [true, traverse.call(node)] }
-                when true; lambda { |_| [true, true] }
-                when false; lambda { |_| [true, false] } # effectively same as #children.each
-                when nil; raise ArgumentError
-              end
-          end
+    def initialize(select_expr = nil, traverse_expr = nil, &block)
+      if select_expr.nil? && block_given?
+        @matcher = block
+      else
+        select_expr ||= true
+        traverse_expr ||= (block_given? ? block : true)
+        select = Matcher.new(select_expr)
+        traverse = Matcher.new(traverse_expr)
+        @matcher = lambda { |node| [select.match(node), traverse.match(node)] }
+      end
     end
 
     # Match +node+ against the filter and return a [select, traverse] tuple of booleans
     def match(node) = @matcher.call(node)
-
-    # Combine two filters using 'or'
-#   def ||(other)
-#     constrain other, Filter
-#     Filter.new
-#   end
-
-    # Create a proc if arg is a Symbol or an Array of classes. Pass through
-    # Proc objects, true, false, and nil
-    def mk_lambda(arg) = self.class.mk_lambda(arg)
-    def self.mk_lambda(arg)
-      case arg
-        when Proc, true, false, nil
-          arg
-        when Symbol
-          lambda { |node| node.respond_to?(arg) && node.send(arg) }
-        when Class
-          lambda { |node| node.is_a? arg }
-        when Array
-          arg.all? { |a| a.is_a? Class } or raise ArgumentError, "Array elements should be classes"
-          lambda { |node| arg.any? { |a| node.is_a? a } }
-      else
-        raise ArgumentError
-      end
-    end
 
     ALL = Filter.new
   end

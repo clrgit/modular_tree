@@ -1,9 +1,11 @@
-module Prick
+module Tree
   class AbstractMatcher
-    def match?(node) = abstract_method
+    def match(node) = abstract_method
   end
   
   class Matcher < AbstractMatcher
+    def match(node) = match?(node)
+
     def match?(node)
       case @expr
         when Proc
@@ -31,7 +33,7 @@ module Prick
     def and(other) = MatchExpression::AndExpr.new(self, other)
     def not() = MatchExpression::NegationExpr.new(self)
   end
-    
+
   module MatchExpression
     class BinaryExpr < AbstractMatcher
       def initialize(left, right)

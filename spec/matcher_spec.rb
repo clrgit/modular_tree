@@ -16,7 +16,7 @@ describe "Matcher" do
 
 
     def match(arg = nil, &block) 
-      matcher = arg.is_a?(Prick::AbstractMatcher) ? arg : Prick::Matcher.new(arg, &block)
+      matcher = arg.is_a?(Tree::AbstractMatcher) ? arg : Tree::Matcher.new(arg, &block)
       a.map { |e| matcher.match?(e) }
     end
 
@@ -38,23 +38,23 @@ describe "Matcher" do
 
     describe "#or" do
       it "Combines two matchers by the || operator" do
-        left = Prick::Matcher.new { |node| node.value == 2 }
-        right = Prick::Matcher.new { |node| node.value == 3 }
+        left = Tree::Matcher.new { |node| node.value == 2 }
+        right = Tree::Matcher.new { |node| node.value == 3 }
         matcher = left.or(right)
         expect(match(matcher)).to eq [false, true, true]
       end
     end
     describe "#and" do
       it "Combines two matchers by the && operator" do
-        left = Prick::Matcher.new { |node| [1, 2].include? node.value }
-        right = Prick::Matcher.new { |node| [2, 3].include? node.value }
+        left = Tree::Matcher.new { |node| [1, 2].include? node.value }
+        right = Tree::Matcher.new { |node| [2, 3].include? node.value }
         matcher = left.and(right)
         expect(match(matcher)).to eq [false, true, false]
       end
     end
     describe "#not" do
       it "Negates the result of the match" do
-        matcher = Prick::Matcher.new(subklass).not
+        matcher = Tree::Matcher.new(subklass).not
         expect(match(matcher)).to eq [true, false, false]
       end
     end
