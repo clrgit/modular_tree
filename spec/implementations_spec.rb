@@ -114,7 +114,26 @@ describe "Implementations" do
     let!(:d) { tree.new(root, "d") }
     let!(:e) { tree.new(d, "e") }
 
-    describe "insert" do
+    describe "#detach" do
+      context "removes the node from the tree" do
+        it "accepts an Integer" do
+          root.detach(0)
+          expect(root.children).to eq [d]
+        end
+        it "accepts an object" do
+          root.detach(d)
+          expect(root.children).to eq [a]
+        end
+        it "returns the removed node" do
+          expect(root.detach(0)).to eq a
+        end
+        it "sets the removed node's parent to nil" do
+          expect(root.detach(0).parent).to eq nil
+        end
+      end
+    end
+
+    describe "#insert" do
       it "adds the nodes to children" do
         parent = tree.new(nil, "parent")
         parent.insert(0, child = tree.new(nil, "child"))
@@ -145,7 +164,7 @@ describe "Implementations" do
       end
     end
 
-    describe "append" do
+    describe "#append" do
       it "adds the nodes to children" do
         parent = tree.new(nil, "parent")
         parent.append(-1, child = tree.new(nil, "child"))
@@ -176,7 +195,7 @@ describe "Implementations" do
       end
     end
 
-    describe "replace" do
+    describe "#replace" do
       it "replaces a node" do
         root.replace(d, f = tree.new(nil, "f"))
         expect(root.children).to eq [a, f]

@@ -35,6 +35,12 @@ module Tree
     def children = abstract_method
     def each_child(&block) = children.each(&block)
     def attach(child) = abstract_method
+
+    # :call-seq:
+    #   detach(key)
+    #   detach(child)
+    #
+    def detach(arg) = abstract_method
   end
 
   # TODO

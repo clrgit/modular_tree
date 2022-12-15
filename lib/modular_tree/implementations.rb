@@ -15,8 +15,6 @@
 #
 # Internal trees adds a parent/children relation
 #
-#
-#
 # Only internal trees have parent/child relations. External trees have only branch/branches relations
 
 module Tree
@@ -167,6 +165,12 @@ module Tree
 
     def each_child(&block) = @children.map(&block)
     def attach(child) = @children << child
+    def detach(arg)
+      key = arg.is_a?(Integer) ? arg : @children.index(arg)
+      child = @children.delete_at(key) or raise ArgumentError, "Can't find object"
+      child.send(:instance_variable_set, :@parent, nil)
+      child
+    end
 
     # Can be used with any array implementation. +where+ is either an Integer
     # index or an object
