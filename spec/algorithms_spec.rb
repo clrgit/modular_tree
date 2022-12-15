@@ -61,19 +61,13 @@ describe "Algorithms" do
     end
 
     describe "#edges" do
-      it "returns an enumerator of [first-match, second-match] nodes"
-
-#       root.select(klass).map { |first|
-#         first.each(subklass, false)
-#       p klass
-#       p subklass
-#       root.each(klass, subklass) { |node, _, parent| p [parent.class, node.class] }
-#       expect(root.edges(klass, subklass).to_a).to eq [[a, c], [root, d]]
-#     end
+      it "returns an enumerator of [previous-match, current-match] nodes" do
+        expect(a.edges(true, true).to_a).to eq [[nil,a], [a,b], [a,c]]
+      end
     end
 
     describe "#pairs" do
-      it "returns an array of [previous-match, current-match] objects" do
+      it "returns an array of [previous-match, current-match] nodes" do
         expect(root.pairs(:even?, :odd?)).to eq [[root, a], [d, e]]
       end
     end

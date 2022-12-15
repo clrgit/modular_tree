@@ -89,15 +89,27 @@ module Tree
 
     # Enumerator of edges in the tree. Edges are [previous-matching-node,
     # matching-node] tuples. Top-level nodes have previous-matching-node set to
-    # nil
-    #
-    # FIXME: Not working right now. Not sure how #edges relates to #pairs
+    # nil. If the filter matches all nodes the value is an edge-representation
+    # of the tree
     def edges(*filter, this: true, &block)
       if block_given?
         each(*filter, this: this) { |node, _, parent| yield parent, node }
       else
         Pairs.new { |enum| each(*filter, this: this) { |node, _, parent| enum << [parent, node] } }
       end
+    end
+
+    # Return array of [previous-matching-node, matching-node] tuples. Returns
+    # the empty array ff there is no matching set of nodes
+    def pairs(first_matcher_expr, second_matcher_expr, this: true)
+      first_matcher = Matcher.new(first_matcher_expr)
+      second_matcher = Matcher.new(second_matcher_expr)
+      or_matcher = first_matcher | second_matcher # avoids re-computing this value over and over
+      result = []
+      nodes(first_matcher, false, this: this) { |node|
+        node.do_pairs(result, first_matcher, or_matcher)
+      }
+      result
     end
 
     # Find nodes matching +filter+ and call +traverse_block+ with a node and a
@@ -117,18 +129,6 @@ module Tree
       nodes(filter, this: this).map { |node| traverse_block.call(node, inner_block) }
     end
     
-    # Return array of [previous-matching-node, matching-node] tuples
-    def pairs(first_matcher_expr, second_matcher_expr, this: true)
-      first_matcher = Matcher.new(first_matcher_expr)
-      second_matcher = Matcher.new(second_matcher_expr)
-      or_matcher = first_matcher | second_matcher # avoids re-computing this value over and over
-      result = []
-      nodes(first_matcher, false, this: this) { |node|
-        node.do_pairs(result, first_matcher, or_matcher)
-      }
-      result
-    end
-
     # Traverse the tree top-down while accumulating information in an
     # accumulator object. The block takes a [accumulator, node] tuple and is
     # responsible for adding itself to the accumulator. The return value from
