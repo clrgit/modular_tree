@@ -77,6 +77,21 @@ module Tree
       end
     end
 
+    # Filter children. Doesn't recurse. If a block is given, it should return
+    # truish to select a child node
+    #
+    # TODO: Maybe make #children an Array extended with filtering
+    def choose(match_expr = nil, &block)
+      matcher = Matcher.new(match_expr, &block)
+      if block_given?
+        a = []
+        each_branch { |branch, key| a << branch if matcher.match? branch }
+        a
+      else
+        Enumerator.new { |enum| each_branch { |branch, key| enum << branch if matcher.match? branch } }
+      end
+    end
+
     # Like #each but the block is called with node, key, and parent instead of
     # value, key, and parent
     def nodes(*filter, this: true, &block) = common_each(*filter, :node, :do_each_preorder, this, &block)
@@ -101,9 +116,9 @@ module Tree
 
     # Return array of [previous-matching-node, matching-node] tuples. Returns
     # the empty array ff there is no matching set of nodes
-    def pairs(first_matcher_expr, second_matcher_expr, this: true)
-      first_matcher = Matcher.new(first_matcher_expr)
-      second_matcher = Matcher.new(second_matcher_expr)
+    def pairs(first_match_expr, second_match_expr, this: true)
+      first_matcher = Matcher.new(first_match_expr)
+      second_matcher = Matcher.new(second_match_expr)
       or_matcher = first_matcher | second_matcher # avoids re-computing this value over and over
       result = []
       nodes(first_matcher, false, this: this) { |node|

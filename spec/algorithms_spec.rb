@@ -54,6 +54,21 @@ describe "Algorithms" do
       end
     end
 
+    describe "#choose" do
+      it "returns an array if given a block" do
+        expect(root.choose { false }).to be_a Array
+      end
+      it "returns an enumerator if not given a block" do
+        expect(root.choose(false)).to be_a Enumerator
+      end
+      it "chooses children satisfying the filter" do
+        expect(root.choose(subklass).to_a).to eq [d]
+      end
+      it "chooses children satisfying the block condition" do
+        expect(root.choose { |n| n.is_a? subklass }).to eq [d]
+      end
+    end
+
     describe "#nodes" do
       it "returns node objects" do
         expect(root.nodes(:even?, true).to_a).to eq [root, b, d]

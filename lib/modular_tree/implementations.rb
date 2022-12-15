@@ -164,6 +164,7 @@ module Tree
     end
 
     def each_child(&block) = @children.map(&block)
+
     def attach(child) = @children << child
     def detach(arg)
       key = arg.is_a?(Integer) ? arg : @children.index(arg)

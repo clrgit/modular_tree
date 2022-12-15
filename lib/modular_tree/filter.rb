@@ -22,7 +22,7 @@ module Tree
     #
     #   when +traverse+ is
     #     true    Traverse always. This is the default
-    #     false   Traverse only if select didn't match
+    #     false   Traverse only if select didn't match # TODO: Never traverse to be able to use filters on children
     #     nil     Expects +select+ to be a Proc object that returns a [select,
     #             traverse] tuple of booleans
     #
@@ -33,7 +33,7 @@ module Tree
     # It is not an error if the method doesn't exists on the a given node but
     # the node is not selected/traversed. If the expression is a class or an
     # array of classes, a given node matches if it is an instance of one of the
-    # classes or any subclass
+    # classes and their subclasses
     #
     # If a block is given, it is supposed to return a [select, traverse] tuple
     # of booleans
@@ -42,6 +42,7 @@ module Tree
     # enumerators that doesn't execute the filter unless the enumerator is
     # evaluated
     #
+    # TODO: Accept RegExp -> use to_s to match
     def initialize(select_expr = nil, traverse_expr = nil, &block)
       if select_expr.nil? && block_given?
         @matcher = block
