@@ -1,5 +1,5 @@
 
-describe "algorithms" do
+describe "Algorithms" do
   describe "DownTreeFilteredAlgorithms" do
     let(:klass) {
       Class.new(Tree::ArrayTree) do
@@ -28,6 +28,13 @@ describe "algorithms" do
     let!(:c) { subklass.new(a, "c", 3) }
     let!(:d) { subklass.new(root, "d", 4) }
     let!(:e) { klass.new(d, "e", 5) }
+
+    describe "#bare?" do
+      it "is true iff the node has no branches" do
+        expect(root.bare?).to eq false
+        expect(b.bare?).to eq true
+      end
+    end
 
     describe "#each" do
     end

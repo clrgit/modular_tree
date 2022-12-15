@@ -168,7 +168,10 @@ module Tree
     def each_child(&block) = @children.map(&block)
     def attach(child) = @children << child
 
-    # Can be used with any array implementation
+    # Can be used with any array implementation. +where+ is either an Integer
+    # index or an object
+    #
+    # TODO: Rename #attach. #insert & #append are Enumerable operations
     def insert(where, child) = insert_append(:insert, where, child)
     def append(where, child) = insert_append(:append, where, child)
 

@@ -22,6 +22,7 @@ module Tree
 
   module BranchesProperty
     def branches = abstract_method
+    def bare? = branches.empty?
     def each_branch(&block) = branches.each(&block)
   end
 

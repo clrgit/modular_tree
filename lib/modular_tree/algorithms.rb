@@ -49,8 +49,9 @@ module Tree
     include NodeProperty
     include BranchesProperty
 
-    # True if the node doesn't contain any branches (#empty? for trees)
-    def bare? = raise NotImplemented
+    # True if the node doesn't contain any branches (#empty? for trees).
+    # Default implementation in BranchesProperty
+#   def bare? = raise NotImplemented
 
     # The number of nodes in the tree. Note that this can be an expensive
     # operation because every node has to be visited
