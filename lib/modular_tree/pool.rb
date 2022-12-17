@@ -1,5 +1,8 @@
 module Tree
-  # For internal trees with a global namespace for nodes
+  # A pool assumes objects has a unique identifier
+  #
+  # Pool adds a @pool class variable to the including class and all of its
+  # subclasses
   module Pool
     include PathAlgorithms
 
@@ -9,9 +12,9 @@ module Tree
       super
     end
 
-    def initialize(_parent)
+    def initialize(*args)
       super
-      self.class[self.uid] = self
+      self.class.send(:[]=, self.uid, self)
     end
 
     module ClassMethods
@@ -22,6 +25,11 @@ module Tree
       def empty? = @pool.empty?
       def [](uid) = @pool[uid]
       def []=(uid, node) @pool[uid] = node end
+
+      def inherited(subclass)
+        subclass.instance_variable_set(:@pool, @pool)
+        super
+      end
     end
   end
 end

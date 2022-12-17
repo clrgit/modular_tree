@@ -15,6 +15,11 @@ describe "Pool" do
     end
   }
 
+  let(:subklass) {
+    Class.new(klass) do
+    end
+  }
+
   def build
     root = klass.new(nil, "root")
     a = klass.new(root, "a")
@@ -52,6 +57,7 @@ describe "Pool" do
 
   describe "::size" do
     it "returns the number of objects in the pool" do
+      expect(klass.size).to eq 0
       build
       expect(klass.size).to eq 6
     end
@@ -87,6 +93,15 @@ describe "Pool" do
       build
       klass["root.f"] = klass["root.a"]
       expect(klass["root.f"]).to eq klass["root.a"]
+    end
+  end
+
+  context "with inherited classes" do
+    it "subclasses enters the same pool as the parent" do
+      expect {
+        root = klass.new(nil, "root")
+        a = subklass.new(root, "a")
+      }.not_to raise_error
     end
   end
 end
