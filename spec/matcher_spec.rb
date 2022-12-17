@@ -36,6 +36,25 @@ describe "Matcher" do
       expect(match([subklass, subsubklass])).to eq [false, true, true]
     end
 
+    describe "#initialize" do
+      def match(*args, &block)
+        matcher = Tree::Matcher.new(*args, &block)
+        a.map { |e| matcher.match?(e) }
+      end
+
+      it "accepts a Class" do
+        expect(match(klass)).to eq [true, true, true]
+      end
+
+      it "accepts an array of Classes" do
+        expect(match([subklass, subsubklass])).to eq [false, true, true]
+      end
+
+      it "accepts a list of Classes" do
+        expect(match(subklass, subsubklass)).to eq [false, true, true]
+      end
+    end
+
     describe "#|" do
       it "Combines two matchers by the || operator" do
         left = Tree::Matcher.new { |node| node.value == 2 }

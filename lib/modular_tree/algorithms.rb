@@ -80,9 +80,11 @@ module Tree
     # Filter children. Doesn't recurse. If a block is given, it should return
     # truish to select a child node
     #
+    # The match expression can also be a list of classes (instead of an array of classes)
+    #
     # TODO: Maybe make #children an Array extended with filtering
-    def choose(match_expr = nil, &block)
-      matcher = Matcher.new(match_expr, &block)
+    def choose(*args, &block)
+      matcher = Matcher.new(*args, &block)
       if block_given?
         a = []
         each_branch { |branch, key| a << branch if matcher.match? branch }
