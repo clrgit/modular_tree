@@ -29,7 +29,7 @@ module Tree
 
     def initialize(expr = nil, &block)
       constrain expr, Proc, Symbol, Class, [Class], true, false, nil
-      expr.nil? == block_given? or raise ArgumentError
+      expr.nil? == block_given? or raise ArgumentError, "Expected either an argument or a block"
       @expr = (expr.nil? ? block : expr)
     end
 

@@ -18,6 +18,8 @@ module Tree
       def key?(uid) = @pool.key?(uid)
       def keys = @pool.keys
       def nodes = @pool.values
+      def size = @pool.size
+      def empty? = @pool.empty?
       def [](uid) = @pool[uid]
       def []=(uid, node) @pool[uid] = node end
     end
