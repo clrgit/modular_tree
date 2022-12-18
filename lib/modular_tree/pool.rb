@@ -3,6 +3,7 @@ module Tree
   #
   # Pool adds a @pool class variable to the including class and all of its
   # subclasses
+  #
   module Pool
     include PathAlgorithms
 
@@ -18,8 +19,8 @@ module Tree
     end
 
     module ClassMethods
-      def key?(uid) = @pool.key?(uid)
-      def keys = @pool.keys
+      def uid?(uid) = @pool.key?(uid)
+      def uids = @pool.keys
       def nodes = @pool.values
       def size = @pool.size
       def empty? = @pool.empty?

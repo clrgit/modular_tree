@@ -29,19 +29,19 @@ describe "Pool" do
     e = klass.new(d, "e")
   end
 
-  describe "::key?" do
-    it "returns true if the key is present" do
+  describe "::uid?" do
+    it "returns true if the uid is present" do
       build
-      expect(klass.key? "root.a.b").to eq true
-      expect(klass.key? "root.a.d").to eq false
+      expect(klass.uid? "root.a.b").to eq true
+      expect(klass.uid? "root.a.d").to eq false
 
     end
   end
 
-  describe "::keys" do
-    it "returns the keys (uids) in the pool" do
+  describe "::uids" do
+    it "returns the uids (uids) in the pool" do
       build
-      expect(klass.keys).to eq %w(root root.a root.a.b root.a.c root.d root.d.e)
+      expect(klass.uids).to eq %w(root root.a root.a.b root.a.c root.d root.d.e)
     end
   end
 
