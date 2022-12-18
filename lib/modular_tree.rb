@@ -8,6 +8,10 @@ include Constrain
 require 'forward_to'
 include ForwardTo
 
+module Tree
+  class TreeError < RuntimeError; end
+end
+
 require_relative "modular_tree/version"
 require_relative "modular_tree/separator"
 require_relative "modular_tree/matcher"
