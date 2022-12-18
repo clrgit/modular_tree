@@ -29,6 +29,12 @@ describe "Pool" do
     e = klass.new(d, "e")
   end
 
+  describe "#initialize" do
+    it "raises on duplicate keys" do
+      expect { klass.new(nil, "x"); klass.new(nil, "x") }.to raise_error Tree::TreeError
+    end
+  end
+
   describe "::uid?" do
     it "returns true if the uid is present" do
       build
