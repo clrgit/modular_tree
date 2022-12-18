@@ -152,6 +152,34 @@ describe "Algorithms" do
       end
     end
   end
+
+  describe "PatchAlgorithms" do
+    let(:klass) {
+      Class.new(Tree::ArrayTree) do
+        include Tree::PathAlgorithms
+        attr_reader :name
+        def initialize(parent, name)
+          @name = name
+          super(parent)
+        end
+      end
+    }
+    let!(:root) { klass.new(nil, "root") }
+    let!(:a) { klass.new(root, "a") }
+    let!(:b) { klass.new(a, "b") }
+    let!(:c) { klass.new(a, "c") }
+    let!(:d) { klass.new(root, "d") }
+    let!(:e) { klass.new(d, "e") }
+    
+    describe "#search" do
+      it "returns the first matching ancestor" do
+        expect(e.search { |node| node.name == "d" }).to eq d
+      end
+      it "returns nil if not found" do
+        expect(e.search { |node| node.name == "not" }).to eq nil
+      end
+    end
+  end
 end
 
 

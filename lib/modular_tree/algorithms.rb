@@ -10,14 +10,14 @@ module Tree
     include BranchesProperty
 
     # Bottom-up
-    def ancestors
+    def ancestors # TODO: rename #parents
       curr = self
       a = []
       a.push curr.node while curr = curr.branch
       a
     end
 
-    # Top-down 
+    # Top-down # TODO: rename #ancestors
     def ancestry
       curr = self
       a = []
@@ -306,6 +306,18 @@ module Tree
 
     def path = @path ||= ancestry[1..-1]&.map(&:key)&.join(separator) || ""
     def uid() @uid ||= [parent&.uid, key].compact.join(separator) end
+
+    def search(*args, this: true, &block)
+      matcher = Matcher.new(*args, &block)
+      curr = this ? self : branch
+      while curr
+        return curr if matcher.match?(curr)
+        curr = curr.branch
+      end
+    end
+
+    # TODO
+    def lookup(key) = raise NotImplementedError
   end
 
   module DotAlgorithms
