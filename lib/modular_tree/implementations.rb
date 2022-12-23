@@ -53,6 +53,12 @@ module Tree
     include ParentImplementation
   end
 
+  module InternalRootImplementation
+    include RootProperty
+    include InternalParentImplementation
+    def root = @root ||= parent&.root || self
+  end
+
   module ChildrenImplementation
     include ChildrenProperty
     include BranchesProperty

@@ -23,6 +23,19 @@ describe "Implementations" do
     end
   end
 
+  describe "InternalRootImplementation" do
+    let(:tree) { mk_klass(Tree::InternalRootImplementation) }
+
+    it "defines #root" do
+      a = tree.new(nil, "a")
+      b = tree.new(a, "b")
+      c = tree.new(b, "c")
+      expect(a.root).to eq a
+      expect(b.root).to eq a
+      expect(c.root).to eq a
+    end
+  end
+
   describe "InternalChildrenArrayImplementation" do
     let(:tree) { mk_klass(Tree::InternalChildrenArrayImplementation) }
 
