@@ -69,6 +69,8 @@ module Tree
 
     # Implementation of Enumerable#select extended with a single filter. As
     # #each, the block is called with value, key, and parent arguments
+    #
+    # FIXME: Change semantics to 'select { condition }'
     def select(filter = nil, this: true, &block)
       if block_given?
         each(block, true, this: this).to_a
