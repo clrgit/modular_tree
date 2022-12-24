@@ -104,10 +104,14 @@ module Tree
     # Post-order enumerator of selected nodes
     def postorder(*filter, this: true) = common_each(*filter, :node_value, :each_postorder, this)
 
+    # TODO IDEA: 
+    #   edges -> parent/child nodes
+    #   pairs -> parent/.../descendant nodes
+
     # Enumerator of edges in the tree. Edges are [previous-matching-node,
     # matching-node] tuples. Top-level nodes have previous-matching-node set to
-    # nil. If the filter matches all nodes the value is an edge-representation
-    # of the tree
+    # nil (the result is a forrest). If the filter matches all nodes the value
+    # is an edge-representation of the tree
     def edges(*filter, this: true, &block)
       if block_given?
         each(*filter, this: this) { |node, _, parent| yield parent, node }
@@ -117,7 +121,7 @@ module Tree
     end
 
     # Return array of [previous-matching-node, matching-node] tuples. Returns
-    # the empty array ff there is no matching set of nodes
+    # the empty array iff there is no matching set of nodes
     def pairs(first_match_expr, second_match_expr, this: true)
       first_matcher = Matcher.new(first_match_expr)
       second_matcher = Matcher.new(second_match_expr)
