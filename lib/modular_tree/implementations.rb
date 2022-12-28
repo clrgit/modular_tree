@@ -159,6 +159,9 @@ module Tree
     attr_writer :next_sibling
   end
 
+  # TODO: A ChildrenArrayImplementation that defines #insert and #append and
+  # adds an optional index argument to #attach
+
   module InternalChildrenArrayImplementation
     include InternalChildrenImplementation
 
