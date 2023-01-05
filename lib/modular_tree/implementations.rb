@@ -186,6 +186,8 @@ module Tree
     # index or an object
     #
     # TODO: Rename #attach. #insert & #append are Enumerable operations
+    #
+    # TODO: Default where argument - insert: 0, append: -1
     def insert(where, child) = insert_append(:insert, where, child)
     def append(where, child) = insert_append(:append, where, child)
 

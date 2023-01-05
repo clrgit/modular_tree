@@ -70,12 +70,17 @@ module Tree
     # Implementation of Enumerable#select extended with a single filter. As
     # #each, the block is called with value, key, and parent arguments
     #
-    # FIXME: Change semantics to 'select { condition }'
-    def select(filter = nil, this: true, &block)
+    # The match expression can also be a list of classes (instead of an array of classes)
+    #
+    def select(*expr, this: true, &block)
+      !block_given? || expr.empty? or raise ArgumentError, "Can't use both match expression and block"
       if block_given?
-        each(block, true, this: this).to_a
+        each.select { |branch| yield branch }
+      elsif !expr.empty?
+        matcher = Matcher.new(*expr, &block)
+        each.select { |branch| matcher.match? branch }
       else
-        each(filter || true, true, this: this)
+        each
       end
     end
 
@@ -85,14 +90,15 @@ module Tree
     # The match expression can also be a list of classes (instead of an array of classes)
     #
     # TODO: Maybe make #children an Array extended with filtering
-    def choose(*args, &block)
-      matcher = Matcher.new(*args, &block)
+    def choose(*expr, &block)
+      !block_given? || expr.empty? or raise ArgumentError, "Can't use both match expression and block"
       if block_given?
-        a = []
-        each_branch { |branch, key| a << branch if matcher.match? branch }
-        a
+        each_branch.select { |branch| yield branch }
+      elsif !expr.empty?
+        matcher = Matcher.new(*expr, &block)
+        each_branch.select { |branch| matcher.match? branch }
       else
-        Enumerator.new { |enum| each_branch { |branch, key| enum << branch if matcher.match? branch } }
+        each
       end
     end
 

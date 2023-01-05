@@ -43,8 +43,11 @@ describe "Algorithms" do
       it "returns an array if given a block" do
         expect(root.select { false }).to be_a Array
       end
-      it "returns an enumerator if not given a block" do
-        expect(root.select(false)).to be_a Enumerator
+      it "returns an array if given a filter" do
+        expect(root.select(false)).to be_a Array
+      end
+      it "returns an enumerator if not given a block or a filter" do
+        expect(root.select).to be_a Enumerator
       end
       it "selects all nodes satisfying the filter" do
         expect(root.select(subklass).to_a).to eq [c,d]
@@ -58,8 +61,11 @@ describe "Algorithms" do
       it "returns an array if given a block" do
         expect(root.choose { false }).to be_a Array
       end
-      it "returns an enumerator if not given a block" do
-        expect(root.choose(false)).to be_a Enumerator
+      it "returns an arrya if given a filter" do
+        expect(root.choose(false)).to be_a Array
+      end
+      it "returns an enumerator if not given a block or a filter" do
+        expect(root.choose).to be_a Enumerator
       end
       it "chooses children satisfying the filter" do
         expect(root.choose(subklass).to_a).to eq [d]
