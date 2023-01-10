@@ -1,33 +1,89 @@
 
 describe "Algorithms" do
+  let(:klass) {
+    Class.new(Tree::ArrayTree) do
+      include Tree::PathAlgorithms
+      attr_reader :name
+      def initialize(parent, name)
+        @name = name
+        super(parent)
+      end
+      def to_s = @name
+      def inspect = "<Node:#@name>"
+    end
+  }
+
+  let(:odd_even_klass) {
+    Class.new(klass) do
+      attr_reader :value
+      def initialize(parent, name, value)
+        super(parent, name)
+        @value = value
+      end
+      def even?() = @value.even? 
+      def odd?() = @value.odd?
+    end
+  }
+
+  let(:odd_even_subklass) {
+    Class.new(odd_even_klass) do
+    end
+  }
+
+  describe "UpTreeAlgorithms" do
+    let!(:root) { odd_even_klass.new(nil, "root", 0) }
+    let!(:a) { odd_even_klass.new(root, "a", 1) }
+    let!(:b) { odd_even_klass.new(a, "b", 2) }
+    let!(:c) { odd_even_subklass.new(a, "c", 3) }
+    let!(:d) { odd_even_subklass.new(root, "d", 4) }
+    let!(:e) { odd_even_klass.new(d, "e", 5) }
+
+    describe "ancestors" do
+      it "returns a bottom-up list of ancestors" do
+        expect(e.ancestors).to eq [d, root]
+      end
+      it "applies a filter if present" do
+        expect(e.ancestors(:even?)).to eq [d, root]
+        expect(e.ancestors(:even?, false)).to eq [d]
+        expect(b.ancestors(:odd?)).to eq [a]
+      end
+    end
+
+    describe "ancestry" do
+      it "returns a top-down list of ancestors" do
+        expect(e.ancestry).to eq [root, d]
+      end
+    end
+  end
+
   describe "DownTreeFilteredAlgorithms" do
-    let(:klass) {
-      Class.new(Tree::ArrayTree) do
-        attr_reader :name
-        attr_reader :value
-        def initialize(parent, name, value)
-          @name = name
-          @value = value
-          super(parent)
-        end
-        def even?() = @value.even? 
-        def odd?() = @value.odd?
-        def to_s = @name
-        def inspect = "<Node:#@name>"
-      end
-    }
+#   let(:klass) {
+#     Class.new(Tree::ArrayTree) do
+#       attr_reader :name
+#       attr_reader :value
+#       def initialize(parent, name, value)
+#         @name = name
+#         @value = value
+#         super(parent)
+#       end
+#       def even?() = @value.even? 
+#       def odd?() = @value.odd?
+#       def to_s = @name
+#       def inspect = "<Node:#@name>"
+#     end
+#   }
+#
+#   let(:subklass) {
+#     Class.new(klass) do
+#     end
+#   }
 
-    let(:subklass) {
-      Class.new(klass) do
-      end
-    }
-
-    let!(:root) { klass.new(nil, "root", 0) }
-    let!(:a) { klass.new(root, "a", 1) }
-    let!(:b) { klass.new(a, "b", 2) }
-    let!(:c) { subklass.new(a, "c", 3) }
-    let!(:d) { subklass.new(root, "d", 4) }
-    let!(:e) { klass.new(d, "e", 5) }
+    let!(:root) { odd_even_klass.new(nil, "root", 0) }
+    let!(:a) { odd_even_klass.new(root, "a", 1) }
+    let!(:b) { odd_even_klass.new(a, "b", 2) }
+    let!(:c) { odd_even_subklass.new(a, "c", 3) }
+    let!(:d) { odd_even_subklass.new(root, "d", 4) }
+    let!(:e) { odd_even_klass.new(d, "e", 5) }
 
     describe "#bare?" do
       it "is true iff the node has no branches" do
@@ -50,7 +106,7 @@ describe "Algorithms" do
         expect(root.select).to be_a Enumerator
       end
       it "selects all nodes satisfying the filter" do
-        expect(root.select(subklass).to_a).to eq [c,d]
+        expect(root.select(odd_even_subklass).to_a).to eq [c,d]
       end
       it "selects all nodes satisfying the block condition" do
         expect(root.select { |n| n.name == "e"}).to eq [e]
@@ -68,10 +124,10 @@ describe "Algorithms" do
         expect(root.choose).to be_a Enumerator
       end
       it "chooses children satisfying the filter" do
-        expect(root.choose(subklass).to_a).to eq [d]
+        expect(root.choose(odd_even_subklass).to_a).to eq [d]
       end
       it "chooses children satisfying the block condition" do
-        expect(root.choose { |n| n.is_a? subklass }).to eq [d]
+        expect(root.choose { |n| n.is_a? odd_even_subklass }).to eq [d]
       end
     end
 
@@ -114,7 +170,7 @@ describe "Algorithms" do
         collected = []
         after = []
 
-        matcher = Tree::Matcher.new(subklass) | Tree::Matcher.new { |node| node.name == "e" }
+        matcher = Tree::Matcher.new(odd_even_subklass) | Tree::Matcher.new { |node| node.name == "e" }
 
         traversed = root.traverse(matcher, false, this: true) { |node, inner|
           before << node

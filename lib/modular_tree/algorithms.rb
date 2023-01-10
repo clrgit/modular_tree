@@ -9,11 +9,16 @@ module Tree
     include NodeProperty
     include BranchesProperty
 
-    # Bottom-up
-    def ancestors # TODO: rename #parents
+    # Bottom-up # TODO: rename #parents
+    def ancestors(*filter)
+      filter = Filter.new(*filter)
       curr = self
       a = []
-      a.push curr.node while curr = curr.branch
+      while curr = curr.branch
+        select, continue = filter.match(curr.node)
+        a.push curr.node if select
+        break if !continue
+      end
       a
     end
 
