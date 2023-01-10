@@ -9,8 +9,8 @@ module Tree
     include NodeProperty
     include BranchesProperty
 
-    # Bottom-up # TODO: rename #parents
-    def ancestors(*filter)
+    # Bottom-up
+    def parents(*filter)
       filter = Filter.new(*filter)
       curr = self
       a = []
@@ -23,7 +23,7 @@ module Tree
     end
 
     # Top-down # TODO: rename #ancestors
-    def ancestry
+    def ancestors
       curr = self
       a = []
       a.unshift curr.node while curr = curr.branch

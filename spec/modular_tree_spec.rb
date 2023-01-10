@@ -36,9 +36,9 @@ describe "Tree" do
       expect(true).to eq true # If we made it so far, then this test is a success
     end
     it "has up-methods" do
-      expect(root.ancestors).to eq []
-      expect(a.ancestors).to eq [root]
-      expect(c.ancestors).to eq [a, root]
+      expect(root.parents).to eq []
+      expect(a.parents).to eq [root]
+      expect(c.parents).to eq [a, root]
     end
     it "has down-methods" do
       s = root.aggregate { |node, values|

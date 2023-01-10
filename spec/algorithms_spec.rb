@@ -38,20 +38,20 @@ describe "Algorithms" do
     let!(:d) { odd_even_subklass.new(root, "d", 4) }
     let!(:e) { odd_even_klass.new(d, "e", 5) }
 
-    describe "ancestors" do
-      it "returns a bottom-up list of ancestors" do
-        expect(e.ancestors).to eq [d, root]
+    describe "parents" do
+      it "returns a bottom-up list of parents" do
+        expect(e.parents).to eq [d, root]
       end
       it "applies a filter if present" do
-        expect(e.ancestors(:even?)).to eq [d, root]
-        expect(e.ancestors(:even?, false)).to eq [d]
-        expect(b.ancestors(:odd?)).to eq [a]
+        expect(e.parents(:even?)).to eq [d, root]
+        expect(e.parents(:even?, false)).to eq [d]
+        expect(b.parents(:odd?)).to eq [a]
       end
     end
 
-    describe "ancestry" do
+    describe "ancestors" do
       it "returns a top-down list of ancestors" do
-        expect(e.ancestry).to eq [root, d]
+        expect(e.ancestors).to eq [root, d]
       end
     end
   end
