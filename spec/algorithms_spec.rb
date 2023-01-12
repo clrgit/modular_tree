@@ -42,6 +42,9 @@ describe "Algorithms" do
       it "returns a bottom-up list of parents" do
         expect(e.parents).to eq [d, root]
       end
+      it "returns an empty list if no match" do
+        expect(a.parents(:odd?)).to eq []
+      end
       it "applies a filter if present" do
         expect(e.parents(:even?)).to eq [d, root]
         expect(e.parents(:even?, false)).to eq [d]
