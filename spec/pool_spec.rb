@@ -25,7 +25,7 @@ describe "Pool" do
     a = klass.new(root, "a")
     b = klass.new(a, "b")
     c = klass.new(a, "c")
-    d = klass.new(root, "d")
+    d = subklass.new(root, "d")
     e = klass.new(d, "e")
   end
 
@@ -80,9 +80,9 @@ describe "Pool" do
   describe "::empty!" do
     it "empties the pool" do
       build
-      expect { build }.to raise_error Tree::TreeError
       klass.empty!
-      expect { build }.not_to raise_error
+      expect(klass.uids).to be_empty
+      expect(subklass.uids).to be_empty
     end
   end
 
