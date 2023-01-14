@@ -25,6 +25,7 @@ module Tree
       def nodes = @pool.values
       def size = @pool.size
       def empty? = @pool.empty?
+      def empty! = @pool = {} # Useful in tests where a tree is created multiple times
       def [](uid) = @pool[uid]
       def []=(uid, node) @pool[uid] = node end
 

@@ -115,7 +115,6 @@ module Tree
 # data.visit { ... }
 #       
 
-
 # p Tree.ancestors
 # exit
 

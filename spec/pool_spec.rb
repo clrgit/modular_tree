@@ -77,6 +77,15 @@ describe "Pool" do
     end
   end
 
+  describe "::empty!" do
+    it "empties the pool" do
+      build
+      expect { build }.to raise_error Tree::TreeError
+      klass.empty!
+      expect { build }.not_to raise_error
+    end
+  end
+
   describe "::[]" do
     it "lookups a node by key (uid)" do
       build
