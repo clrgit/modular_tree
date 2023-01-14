@@ -18,7 +18,7 @@ module Tree
 
     def initialize(*args)
       super
-      !self.class.uid?(self.uid) or raise TreeError, "Duplicate UID: #{self.uid}"
+      !self.class.uid?(self.uid) or raise TreeError, "Duplicate UID: #{self.uid.inspect}"
       self.class.send(:[]=, self.uid, self)
     end
 
