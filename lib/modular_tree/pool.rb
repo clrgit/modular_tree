@@ -4,8 +4,11 @@ module Tree
   # Pool adds a @pool class variable to the including class and all of its
   # subclasses
   #
+  # TODO: Make a separate gem. Then extend with with a lookup method and
+  # optionally an specialized #dot method
+  #
   module Pool
-    include PathAlgorithms
+#   include PathAlgorithms
 
     def self.included(other)
       other.extend(ClassMethods)
