@@ -1,0 +1,46 @@
+
+MODEL
+  Properties
+    Abstract properties
+
+  Implementations
+    Implementation of properties
+
+  Monkeys
+    A monkey is an object that is able to navigate the tree. Monkeys are external
+    iterators that makes it possible to use the same algorithms on Tree objects
+    and on other objects with a tree structure
+
+  Filters
+    Selects objects in a tree and return a Monkey of the result. Maintains
+    parent/child relationships
+
+    #filter
+
+  Algorithms
+    Algorithms assume properties and use monkeys in their implementations
+
+    #each
+    #traverse
+    #accumulate
+
+  #accumulate
+    make it work on simple arrays too: a.accumulate(0) { |a,e| expr -> next objects accumulator }
+  
+
+IDEAS
+  o Let #follow be a Tree altgorithm
+  o Create a #visit method that is the opposite of #follow by recursively
+    visiting the result of a node
+
+  o A general filter method that returns a tree enumerator so instead of
+
+      spec.accumulate(Spec::CommandDefinition, program) { |parent,defn| ...
+
+    we can say
+
+      spec.filter(Spec::CommandDefinition).accumulate(program) { |parent,defn| ...
+
+
+
+

@@ -69,7 +69,7 @@ module Tree
     # Implementation of Enumerable#each extended with filters. The block is
     # called with value, key, and parent as arguments but it may choose to
     # ignore the key and/or parent argument. Returns an enumerator of values
-    # without a block
+    # if called without a block
     def each(*filter, this: true, &block) = common_each(*filter, :node_value, :do_each_preorder, this, &block)
 
     # Implementation of Enumerable#select extended with a single filter. As
@@ -167,8 +167,8 @@ module Tree
     # accumulator object. The block takes a [accumulator, node] tuple and is
     # responsible for adding itself to the accumulator. The return value from
     # the block is then used as the accumulator for the branch nodes. Note that
-    # it returns the original accumulator and not the final result - this makes
-    # it different from #inject
+    # it returns the original accumulator and not the final result - this also
+    # makes it different from #inject
     #
     # #accumulate is a kind of "preorder" algorithm
     def accumulate(*filter, accumulator, this: true, &block)
